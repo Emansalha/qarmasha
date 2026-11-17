@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../core/theme.dart';
+import '../widgets/animations.dart';
+import '../widgets/common.dart';
 import '../state/app_state.dart';
 import 'home_screen.dart';
 import 'menu_screen.dart';
@@ -47,7 +49,30 @@ class _MainShellState extends State<MainShell> {
       const ProfileScreen(),
     ];
     return Scaffold(
-      body: IndexedStack(index: _index, children: pages),
+      extendBody: true,
+      body: Stack(
+        children: [
+          IndexedStack(index: _index, children: pages),
+          // شريط السلة العائم
+          Positioned(
+            right: 16,
+            left: 16,
+            bottom: MediaQuery.of(context).padding.bottom + 92,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 350),
+              transitionBuilder: (c, a) => SlideTransition(
+                position: Tween(begin: const Offset(0, 1.4), end: Offset.zero)
+                    .animate(CurvedAnimation(
+                        parent: a, curve: Curves.easeOutBack)),
+                child: c,
+              ),
+              child: state.cartCount == 0 || _index == 2
+                  ? const SizedBox.shrink(key: ValueKey('empty'))
+                  : _MiniCartBar(key: const ValueKey('bar'), state: state),
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(
@@ -168,6 +193,91 @@ class _NavItem extends StatelessWidget {
                     color: color,
                     fontWeight:
                         selected ? FontWeight.bold : FontWeight.normal)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniCartBar extends StatelessWidget {
+  const _MiniCartBar({super.key, required this.state});
+  final AppState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final thumbs = state.cart.take(3).toList();
+    return Pressable(
+      scale: 0.97,
+      onTap: () => openCart(context),
+      child: Container(
+        height: 62,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: AppColors.ink,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: glowShadow(AppColors.ink),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 42.0 + (thumbs.length - 1) * 22,
+              height: 42,
+              child: Stack(
+                children: [
+                  for (var i = 0; i < thumbs.length; i++)
+                    Positioned(
+                      right: i * 22.0,
+                      child: Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.ink, width: 3),
+                        ),
+                        child: ClipOval(
+                            child: NetImage(thumbs[i].item.imageUrl)),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${state.cartCount} صنف في السلة',
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 12)),
+                  PulseOnChange(
+                    trigger: state.cartPulse,
+                    child: Text(money(state.cartSubtotal, state.currency),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900)),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                gradient: AppColors.fire,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Row(
+                children: [
+                  Text('عرض السلة',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w900)),
+                  SizedBox(width: 4),
+                  Icon(Icons.arrow_back_rounded, color: Colors.white, size: 18),
+                ],
+              ),
+            ),
           ],
         ),
       ),

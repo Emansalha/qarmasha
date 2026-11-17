@@ -7,8 +7,10 @@ import '../core/theme.dart';
 import '../data/demo_menu.dart';
 import '../data/models.dart';
 import '../state/app_state.dart';
+import '../widgets/animations.dart';
 import '../widgets/common.dart';
 import '../widgets/flame_logo.dart';
+import '../widgets/table_picker.dart';
 import 'search_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -21,210 +23,272 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
     final firstName = (state.user?.name ?? '').split(' ').first;
+    final hour = DateTime.now().hour;
+    final greeting = hour < 12
+        ? 'صباح الخير'
+        : (hour < 18 ? 'نهارك سعيد' : 'مساء الخير');
+    final deal = state.items.where((i) => i.hasDiscount).toList()
+      ..sort((a, b) => b.discountPercent.compareTo(a.discountPercent));
+    final chef = state.featured.take(3).toList();
+    var i = 0;
+
     return SafeArea(
       bottom: false,
       child: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: state.loadMenu,
         child: ListView(
-          padding: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.only(bottom: 170),
           children: [
-            // الشريط العلوي
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          firstName.isEmpty
-                              ? 'أهلاً يا عاشق القرمشة 👋'
-                              : 'أهلاً $firstName 👋',
-                          style: const TextStyle(
-                              fontSize: 13, color: AppColors.muted),
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 26,
-                              height: 26,
-                              child: CustomPaint(
-                                painter: FlamePainter(
-                                    outerColor: AppColors.primary),
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(AppConfig.appName,
-                                style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w900,
-                                    color: AppColors.primary,
-                                    height: 1.1)),
-                          ],
-                        ),
-                        const Text(AppConfig.tagline,
-                            style: TextStyle(
-                                fontSize: 12, color: AppColors.muted)),
-                      ],
+            // ===== الشريط العلوي =====
+            FadeSlideIn(
+              index: i++,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 46,
+                      height: 46,
+                      padding: const EdgeInsets.all(9),
+                      decoration: BoxDecoration(
+                        gradient: AppColors.fire,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: glowShadow(),
+                      ),
+                      child: CustomPaint(painter: FlamePainter()),
                     ),
-                  ),
-                  CircleIconButton(
-                    icon: Icons.notifications_none_rounded,
-                    badge: state.orders
-                        .where((o) =>
-                            o.status == OrderStatus.preparing ||
-                            o.status == OrderStatus.pending)
-                        .length,
-                    onTap: () => _showStatus(context, state),
-                  ),
-                  const SizedBox(width: 10),
-                  const CartButton(),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            firstName.isEmpty
+                                ? '$greeting 👋'
+                                : '$greeting، $firstName 👋',
+                            style: const TextStyle(
+                                fontSize: 13, color: AppColors.muted),
+                          ),
+                          const Text(AppConfig.appName,
+                              style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.text,
+                                  height: 1.2)),
+                        ],
+                      ),
+                    ),
+                    CircleIconButton(
+                      icon: Icons.notifications_none_rounded,
+                      badge: state.orders
+                          .where((o) =>
+                              o.status == OrderStatus.preparing ||
+                              o.status == OrderStatus.pending)
+                          .length,
+                      onTap: () => _showStatus(context, state),
+                    ),
+                    const SizedBox(width: 10),
+                    const CartButton(),
+                  ],
+                ),
               ),
             ),
 
-            // البحث
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const SearchScreen())),
-                      child: Container(
-                        height: 52,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: softShadow(),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.search_rounded, color: AppColors.text),
-                            SizedBox(width: 10),
-                            Text('ابحث عن وجبتك المفضّلة...',
-                                style: TextStyle(color: AppColors.muted)),
-                          ],
+            // ===== العنوان الكبير =====
+            FadeSlideIn(
+              index: i++,
+              child: const Padding(
+                padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                child: Text.rich(
+                  TextSpan(
+                    style: TextStyle(
+                        fontSize: 30,
+                        height: 1.25,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.text),
+                    children: [
+                      TextSpan(text: 'شو نفسك تاكل\n'),
+                      TextSpan(
+                          text: 'اليوم',
+                          style: TextStyle(color: AppColors.primary)),
+                      TextSpan(text: '؟ 🍗'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // ===== البحث =====
+            FadeSlideIn(
+              index: i++,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Pressable(
+                        scale: 0.98,
+                        onTap: () => Navigator.push(
+                            context,
+                            SmoothRoute<void>(
+                                builder: (_) => const SearchScreen())),
+                        child: Container(
+                          height: 54,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: softShadow(),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.search_rounded,
+                                  color: AppColors.primary),
+                              SizedBox(width: 10),
+                              Text('ابحث عن وجبة، برجر، حلويات...',
+                                  style: TextStyle(color: AppColors.muted)),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  CircleIconButton(
-                    icon: Icons.tune_rounded,
-                    size: 52,
-                    onTap: () => onOpenMenu(null),
-                  ),
-                ],
+                    const SizedBox(width: 10),
+                    CircleIconButton(
+                      icon: Icons.tune_rounded,
+                      size: 54,
+                      color: Colors.white,
+                      background: AppColors.ink,
+                      onTap: () => onOpenMenu(null),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ===== طريقة الطلب =====
+            FadeSlideIn(
+              index: i++,
+              child: const Padding(
+                padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+                child: OrderModeSwitch(),
               ),
             ),
 
             if (state.loadingMenu)
               const Padding(
-                padding: EdgeInsets.only(top: 12),
+                padding: EdgeInsets.fromLTRB(20, 12, 20, 0),
                 child: LinearProgressIndicator(
                     color: AppColors.primary, minHeight: 2),
               ),
 
             const SizedBox(height: 18),
-            _BannerCarousel(
-              banners: state.banners,
-              onOrder: () => onOpenMenu(null),
+            FadeSlideIn(
+              index: i++,
+              child: _BannerCarousel(
+                banners: state.banners,
+                onOrder: () => onOpenMenu(null),
+              ),
             ),
 
-            // التصنيفات
-            const SizedBox(height: 18),
+            // ===== التصنيفات =====
+            SectionHeader('التصنيفات', onSeeAll: () => onOpenMenu(null)),
             SizedBox(
-              height: 100,
+              height: 104,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 children: [
-                  CategoryBubble(
-                    label: 'الكل',
-                    emoji: '🍽️',
-                    selected: true,
-                    onTap: () => onOpenMenu(null),
-                  ),
-                  for (final c in state.categories)
-                    CategoryBubble(
-                      label: c.name,
-                      emoji: c.emoji,
-                      imageUrl: c.imageUrl,
-                      selected: false,
-                      onTap: () => onOpenMenu(c.id),
+                  for (var k = 0; k < state.categories.length; k++)
+                    FadeSlideIn(
+                      index: k,
+                      horizontal: true,
+                      child: CategoryBubble(
+                        label: state.categories[k].name,
+                        emoji: state.categories[k].emoji,
+                        imageUrl: state.categories[k].imageUrl,
+                        selected: false,
+                        onTap: () => onOpenMenu(state.categories[k].id),
+                      ),
                     ),
                 ],
               ),
             ),
 
-            SectionHeader('وجبات مميزة', onSeeAll: () => onOpenMenu(null)),
+            // ===== عرض اليوم بعدّاد =====
+            if (deal.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
+                child: _FlashDeal(item: deal.first, until: state.flashDealEnds),
+              ),
+
+            // ===== المميزة =====
+            SectionHeader('الأطباق المميزة',
+                subtitle: 'اختارها الشيف لك اليوم',
+                emoji: '⭐',
+                onSeeAll: () => onOpenMenu(null)),
             SizedBox(
               height: 300,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                 itemCount: state.featured.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 14),
-                itemBuilder: (_, i) => FoodCard(item: state.featured[i]),
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                itemBuilder: (_, k) => FadeSlideIn(
+                  index: k,
+                  horizontal: true,
+                  child: FoodCard(item: state.featured[k]),
+                ),
               ),
             ),
 
-            // بطاقة العرض الحصري
+            // ===== لوحة الشيف (Bento) =====
+            if (chef.length == 3) ...[
+              const SectionHeader('توصيات الشيف', emoji: '👨‍🍳'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SizedBox(
+                  height: 260,
+                  child: Row(
+                    children: [
+                      Expanded(child: _BentoTile(item: chef[0], big: true)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Expanded(child: _BentoTile(item: chef[1])),
+                            const SizedBox(height: 12),
+                            Expanded(child: _BentoTile(item: chef[2])),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+
+            // ===== الأكثر طلباً =====
+            const SectionHeader('الأكثر طلباً',
+                subtitle: 'الأصناف اللي الكل بيحبها', emoji: '🔥'),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
-              child: _OfferStrip(onTap: () => onOpenMenu(null)),
-            ),
-
-            const SectionHeader('الأكثر طلباً 🔥'),
-            SizedBox(
-              height: 300,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                itemCount: state.popular.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 14),
-                itemBuilder: (_, i) =>
-                    FoodCard(item: state.popular[i], width: 170),
-              ),
-            ),
-
-            // طريقة الطلب
-            const SectionHeader('كيف تحب تطلب؟'),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
                 children: [
-                  Expanded(
-                    child: _HowCard(
-                      icon: Icons.table_restaurant_rounded,
-                      title: 'داخل المطعم',
-                      subtitle: 'اختر رقم طاولتك ونجهّز طلبك عليها',
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: _HowCard(
-                      icon: Icons.delivery_dining_rounded,
-                      title: 'توصيل',
-                      subtitle: 'نوصل طلبك ساخن لباب البيت',
-                    ),
-                  ),
+                  for (var k = 0; k < state.popular.take(5).length; k++)
+                    FadeSlideIn(
+                        index: k, child: FoodTile(item: state.popular[k])),
                 ],
               ),
             ),
+
             if (state.usingDemoMenu)
               const Padding(
-                padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+                padding: EdgeInsets.fromLTRB(24, 8, 24, 0),
                 child: Text(
                   'ℹ️ يُعرض الآن المنيو التجريبي — سيظهر منيو المطعم الحقيقي فور تفعيل المتجر على دوري.',
+                  textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 11, color: AppColors.muted),
                 ),
               ),
@@ -243,6 +307,7 @@ class HomeScreen extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      backgroundColor: AppColors.background,
       builder: (_) => Directionality(
         textDirection: TextDirection.rtl,
         child: Padding(
@@ -252,7 +317,7 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('الإشعارات',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
               const SizedBox(height: 12),
               if (active.isEmpty)
                 const Text('لا توجد طلبات نشطة حالياً 🍗',
@@ -262,16 +327,151 @@ class HomeScreen extends StatelessWidget {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const CircleAvatar(
-                      backgroundColor: Color(0xFFFFEDE6),
+                      backgroundColor: AppColors.cream,
                       child: Icon(Icons.local_fire_department,
                           color: AppColors.primary),
                     ),
-                    title: Text('طلب #${o.code} — ${o.status.label}'),
+                    title: Text('طلب #${o.code} — ${o.status.label}',
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
                     subtitle: Text(o.destination),
                   ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// مفتاح منزلق: داخل المطعم (طاولة) / توصيل — مع تفاصيل الوجهة.
+class OrderModeSwitch extends StatelessWidget {
+  const OrderModeSwitch({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = AppScope.of(context);
+    final dineIn = state.orderMode == OrderType.dineIn;
+    Widget option(OrderType type, IconData icon, String label) {
+      final sel = state.orderMode == type;
+      return Expanded(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => state.setOrderMode(type),
+          child: SizedBox(
+            height: 46,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon,
+                    size: 20, color: sel ? Colors.white : AppColors.muted),
+                const SizedBox(width: 6),
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 200),
+                  style: TextStyle(
+                    fontFamily: kFont,
+                    fontWeight: FontWeight.w800,
+                    color: sel ? Colors.white : AppColors.muted,
+                  ),
+                  child: Text(label),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: softShadow(),
+      ),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              AnimatedAlign(
+                duration: const Duration(milliseconds: 320),
+                curve: Curves.easeOutBack,
+                alignment:
+                    dineIn ? Alignment.centerRight : Alignment.centerLeft,
+                child: FractionallySizedBox(
+                  widthFactor: 0.5,
+                  child: Container(
+                    height: 46,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.fire,
+                      borderRadius: BorderRadius.circular(17),
+                      boxShadow: glowShadow(),
+                    ),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  option(OrderType.dineIn, Icons.table_restaurant_rounded,
+                      'داخل المطعم'),
+                  option(OrderType.delivery, Icons.delivery_dining_rounded,
+                      'توصيل'),
+                ],
+              ),
+            ],
+          ),
+          Pressable(
+            scale: 0.98,
+            onTap: () async {
+              if (dineIn) {
+                final t =
+                    await showTablePicker(context, current: state.tableNumber);
+                if (t != null) state.setTable(t);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 4),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: Row(
+                  key: ValueKey('$dineIn-${state.tableNumber}'),
+                  children: [
+                    Icon(
+                      dineIn
+                          ? Icons.event_seat_rounded
+                          : Icons.location_on_rounded,
+                      color: AppColors.primary,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        dineIn
+                            ? (state.tableNumber == null
+                                ? 'اختر رقم طاولتك لنقدّم طلبك عليها'
+                                : 'طاولتك: رقم ${state.tableNumber}')
+                            : (state.savedAddress.isEmpty
+                                ? 'التوصيل خلال 30-45 دقيقة • تُدخل العنوان عند الدفع'
+                                : 'التوصيل إلى: ${state.savedAddress}'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.text),
+                      ),
+                    ),
+                    if (dineIn)
+                      Text(state.tableNumber == null ? 'اختيار' : 'تغيير',
+                          style: const TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -499,89 +699,138 @@ class _BannerCard extends StatelessWidget {
   }
 }
 
-class _OfferStrip extends StatelessWidget {
-  const _OfferStrip({required this.onTap});
-  final VoidCallback onTap;
+/// بطاقة عرض اليوم: خلفية داكنة، صورة مائلة، وعدّاد تنازلي حي.
+class _FlashDeal extends StatelessWidget {
+  const _FlashDeal({required this.item, required this.until});
+  final MenuItem item;
+  final DateTime until;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
+    final state = AppScope.of(context);
+    return Pressable(
+      scale: 0.98,
+      onTap: () => openItem(context, item),
       child: Container(
-        height: 130,
+        height: 176,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFFE9DA), Color(0xFFFFF6EE)],
-          ),
-          boxShadow: softShadow(),
+          color: AppColors.ink,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: glowShadow(AppColors.ink),
         ),
-        child: Row(
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 16, 18, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('عرض حصري',
-                        style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold)),
-                    const Text('خصم حتى 30%',
-                        style: TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.w900)),
-                    const Text('على الوجبات المختارة',
-                        style:
-                            TextStyle(color: AppColors.muted, fontSize: 12)),
-                    const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text('اطلب الآن',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold)),
-                    ),
-                  ],
+            // توهج ناري في الخلفية
+            Positioned(
+              left: -30,
+              top: -30,
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(colors: [
+                    AppColors.primary.withValues(alpha: 0.55),
+                    Colors.transparent,
+                  ]),
                 ),
               ),
             ),
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(24),
-                bottomLeft: Radius.circular(24),
-              ),
-              child: Stack(
-                children: [
-                  NetImage(img('burger_fries'), width: 150, height: 130),
-                  Positioned(
-                    top: 10,
-                    left: 10,
-                    child: Container(
-                      width: 54,
-                      height: 54,
-                      alignment: Alignment.center,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
+            Positioned(
+              left: -6,
+              top: -18,
+              child: Transform.rotate(
+                angle: -0.12,
+                child: Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.accent, width: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.45),
+                        blurRadius: 20,
+                        offset: const Offset(0, 12),
                       ),
-                      child: const Text('30%\nخصم',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              height: 1.1,
-                              fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                  child: ClipOval(child: NetImage(item.imageUrl)),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 112,
+              top: 6,
+              child: Container(
+                width: 58,
+                height: 58,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.accent,
+                  shape: BoxShape.circle,
+                  boxShadow: glowShadow(AppColors.accent),
+                ),
+                child: Text('-${item.discountPercent}%',
+                    style: const TextStyle(
+                        color: AppColors.ink,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15)),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 18, 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 6,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.bolt_rounded,
+                                color: AppColors.accent, size: 18),
+                            Text('عرض اليوم ينتهي خلال',
+                                style: TextStyle(
+                                    color: AppColors.accent,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        CountdownBoxes(
+                          until: until,
+                          boxColor: Colors.white,
+                          textColor: AppColors.ink,
+                        ),
+                        const Spacer(),
+                        Text(item.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900)),
+                        Row(
+                          children: [
+                            Text(money(item.finalPrice, state.currency),
+                                style: const TextStyle(
+                                    color: AppColors.accent,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900)),
+                            const SizedBox(width: 8),
+                            Text(money(item.price, state.currency),
+                                style: const TextStyle(
+                                    color: Colors.white54,
+                                    decoration: TextDecoration.lineThrough)),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
+                  const Spacer(flex: 4),
                 ],
               ),
             ),
@@ -592,38 +841,72 @@ class _OfferStrip extends StatelessWidget {
   }
 }
 
-class _HowCard extends StatelessWidget {
-  const _HowCard(
-      {required this.icon, required this.title, required this.subtitle});
-  final IconData icon;
-  final String title;
-  final String subtitle;
+/// بلاطة صورة كبيرة بنص فوق تدرّج (تخطيط Bento).
+class _BentoTile extends StatelessWidget {
+  const _BentoTile({required this.item, this.big = false});
+  final MenuItem item;
+  final bool big;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: softShadow(),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            backgroundColor: const Color(0xFFFFEDE6),
-            child: Icon(icon, color: AppColors.primary),
-          ),
-          const SizedBox(height: 10),
-          Text(title,
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-          const SizedBox(height: 4),
-          Text(subtitle,
-              style: const TextStyle(
-                  color: AppColors.muted, fontSize: 12, height: 1.4)),
-        ],
+    final state = AppScope.of(context);
+    return Pressable(
+      onTap: () => openItem(context, item),
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: softShadow(),
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            NetImage(item.imageUrl),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Color(0xDD1C1210)],
+                  stops: [0.4, 1],
+                ),
+              ),
+            ),
+            Positioned(
+              right: 12,
+              left: 12,
+              bottom: 12,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(item.name,
+                            maxLines: 2,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: big ? 18 : 13,
+                                height: 1.2,
+                                fontWeight: FontWeight.w900)),
+                        const SizedBox(height: 2),
+                        Text(money(item.finalPrice, state.currency),
+                            style: TextStyle(
+                                color: AppColors.accent,
+                                fontSize: big ? 16 : 13,
+                                fontWeight: FontWeight.w900)),
+                      ],
+                    ),
+                  ),
+                  AddButton(
+                      size: big ? 38 : 30, onTap: () => quickAdd(context, item)),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

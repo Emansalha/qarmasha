@@ -303,6 +303,7 @@ class ApiService {
         'طلب #$orderCode',
         where,
         'الكمية: ${line.quantity}',
+        if (line.optionsSummary.isNotEmpty) 'الخيارات: ${line.optionsSummary}',
         if (line.note.isNotEmpty) 'ملاحظة الصنف: ${line.note}',
         if (notes.isNotEmpty) 'ملاحظات: $notes',
       ].join(' | ');

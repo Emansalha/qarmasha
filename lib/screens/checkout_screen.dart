@@ -5,6 +5,8 @@ import '../core/theme.dart';
 import '../data/api_service.dart';
 import '../data/models.dart';
 import '../state/app_state.dart';
+import '../widgets/animations.dart';
+import '../widgets/table_picker.dart';
 import 'auth/login_screen.dart';
 import 'order_success_screen.dart';
 
@@ -24,6 +26,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   int? _table;
   String _payment = 'cash';
   bool _loading = false;
+  bool _prefilled = false;
 
   final _name = TextEditingController();
   final _phone = TextEditingController();
@@ -35,10 +38,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final user = AppScope.read(context).user;
-    if (user != null && _name.text.isEmpty) {
-      _name.text = user.name;
-      _phone.text = user.phone;
+    final state = AppScope.read(context);
+    final user = state.user;
+    if (!_prefilled) {
+      _prefilled = true;
+      _type = state.orderMode;
+      _table = state.tableNumber;
+      if (state.savedAddress.isNotEmpty) _city.text = state.savedAddress;
+      if (user != null) {
+        _name.text = user.name;
+        _phone.text = user.phone;
+      }
     }
   }
 
@@ -89,7 +99,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => OrderSuccessScreen(order: order)),
+        SmoothRoute<void>(builder: (_) => OrderSuccessScreen(order: order)),
         (route) => route.isFirst,
       );
     } on ApiException catch (e) {
@@ -132,7 +142,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     title: 'داخل المطعم',
                     subtitle: 'برقم الطاولة',
                     selected: _type == OrderType.dineIn,
-                    onTap: () => setState(() => _type = OrderType.dineIn),
+                    onTap: () {
+                      setState(() => _type = OrderType.dineIn);
+                      state.setOrderMode(OrderType.dineIn);
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -142,7 +155,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     title: 'توصيل',
                     subtitle: 'لباب البيت',
                     selected: _type == OrderType.delivery,
-                    onTap: () => setState(() => _type = OrderType.delivery),
+                    onTap: () {
+                      setState(() => _type = OrderType.delivery);
+                      state.setOrderMode(OrderType.delivery);
+                    },
                   ),
                 ),
               ],
@@ -222,7 +238,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.bold)),
                           const SizedBox(width: 8),
-                          Expanded(child: Text(l.item.name)),
+                          Expanded(
+                            child: Text(
+                              l.optionsSummary.isEmpty
+                                  ? l.item.name
+                                  : '${l.item.name}\n${l.optionsSummary}',
+                              style: const TextStyle(height: 1.4),
+                            ),
+                          ),
                           Text(money(l.total, state.currency)),
                         ],
                       ),
@@ -270,35 +293,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         const Text('تجد الرقم مكتوباً على طاولتك داخل المطعم',
             style: TextStyle(color: AppColors.muted, fontSize: 12)),
         const SizedBox(height: 12),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: AppConfig.tablesCount,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 6,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-          ),
-          itemBuilder: (_, i) {
-            final n = i + 1;
-            final sel = _table == n;
-            return GestureDetector(
-              onTap: () => setState(() => _table = n),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: sel ? AppColors.primary : Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                      color: sel ? AppColors.primary : AppColors.border),
-                ),
-                child: Text('$n',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: sel ? Colors.white : AppColors.text)),
-              ),
-            );
+        TableGrid(
+          selected: _table,
+          onSelect: (n) {
+            setState(() => _table = n);
+            AppScope.read(context).setTable(n);
           },
         ),
         if (_table != null)

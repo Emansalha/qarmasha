@@ -5,6 +5,7 @@ import '../core/theme.dart';
 import '../data/demo_menu.dart';
 import '../state/app_state.dart';
 import '../widgets/common.dart';
+import '../widgets/animations.dart';
 import '../widgets/flame_logo.dart';
 import 'auth/login_screen.dart';
 import 'main_shell.dart';
@@ -62,8 +63,9 @@ class _SplashScreenState extends State<SplashScreen>
       context,
       PageRouteBuilder<void>(
         transitionDuration: const Duration(milliseconds: 650),
-        pageBuilder: (_, __, ___) =>
-            state.isLoggedIn ? const MainShell() : const WelcomeScreen(),
+        pageBuilder: (_, __, ___) => state.isLoggedIn || state.onboardingSeen
+            ? const MainShell()
+            : const WelcomeScreen(),
         transitionsBuilder: (_, anim, __, child) => FadeTransition(
           opacity: anim,
           child: ScaleTransition(
@@ -279,75 +281,252 @@ class AppLogo extends StatelessWidget {
   }
 }
 
-/// شاشة الترحيب (مثل البداية في مشروع سطر).
-class WelcomeScreen extends StatelessWidget {
+/// شاشات تعريفية (Onboarding) بصور حقيقية وانتقالات سلسة.
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
   @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  final _controller = PageController();
+  double _page = 0;
+
+  static final _pages = [
+    (
+      image: img('strips'),
+      tag: 'دجاج طازج 100%',
+      title: 'قرمشة\nما بتنتسى 🔥',
+      body: 'دجاج متبّل بخلطتنا السرية ومقلي لحظة طلبك، ذهبي ومقرمش من أول لقمة.',
+    ),
+    (
+      image: img('zinger_meal'),
+      tag: 'داخل المطعم',
+      title: 'اطلب من\nطاولتك 🍽️',
+      body: 'اختر رقم طاولتك واطلب من جوالك، ونحن نجيب الطلب لعندك بدون انتظار.',
+    ),
+    (
+      image: img('family_box'),
+      tag: 'توصيل سريع',
+      title: 'أو خلّيه\nيوصلك 🛵',
+      body: 'وجباتك المفضّلة ساخنة لباب البيت خلال 30-45 دقيقة، مع تتبّع مباشر للطلب.',
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      setState(() => _page = _controller.page ?? 0);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _finish(Widget next) {
+    AppScope.read(context).markOnboardingSeen();
+    Navigator.pushReplacement(context, SmoothRoute<void>(builder: (_) => next));
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final last = _page > _pages.length - 1.5;
+    final index = _page.round().clamp(0, _pages.length - 1).toInt();
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.ink,
       body: Stack(
-        fit: StackFit.expand,
         children: [
-          NetImage(img('strips')),
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.transparent, Color(0xEE1A0A08)],
-                stops: [0.25, 0.75],
+          // صور بتأثير Parallax
+          PageView.builder(
+            controller: _controller,
+            itemCount: _pages.length,
+            itemBuilder: (_, i) {
+              final delta = (_page - i);
+              return ClipRect(
+                child: Transform.translate(
+                  offset: Offset(delta * 120, 0),
+                  child: Transform.scale(
+                    scale: 1.15 - delta.abs() * 0.1,
+                    child: NetImage(_pages[i].image),
+                  ),
+                ),
+              );
+            },
+          ),
+          const IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0x99000000),
+                    Colors.transparent,
+                    Color(0xCC1C1210),
+                    AppColors.ink,
+                  ],
+                  stops: [0, 0.3, 0.62, 0.85],
+                ),
               ),
+              child: SizedBox.expand(),
             ),
           ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    children: [
+                      const AppLogo(light: true, size: 22),
+                      const Spacer(),
+                      if (!last)
+                        TextButton(
+                          onPressed: () => _controller.animateToPage(
+                            _pages.length - 1,
+                            duration: const Duration(milliseconds: 600),
+                            curve: Curves.easeInOutCubic,
+                          ),
+                          child: const Text('تخطي',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                    ],
+                  ),
                   const Spacer(),
-                  const Tag('دجاج طازج 100%', color: AppColors.primary),
-                  const SizedBox(height: 14),
-                  const Text(
-                    'جوعان؟\nخلّي القرمشة توصلك 🔥',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 34,
-                      height: 1.25,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'اطلب من طاولتك داخل المطعم برقم الطاولة،\nأو خلّي الطلب يوصلك لباب البيت.',
-                    style: TextStyle(color: Colors.white70, height: 1.6),
-                  ),
-                  const SizedBox(height: 28),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    ),
-                    child: const Text('تسجيل الدخول'),
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(54),
-                      side: const BorderSide(color: Colors.white54),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 400),
+                    transitionBuilder: (c, a) => FadeTransition(
+                      opacity: a,
+                      child: SlideTransition(
+                        position: Tween(
+                                begin: const Offset(0, 0.15),
+                                end: Offset.zero)
+                            .animate(a),
+                        child: c,
                       ),
                     ),
-                    onPressed: () => Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const MainShell()),
+                    child: Column(
+                      key: ValueKey(index),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Tag(_pages[index].tag),
+                        const SizedBox(height: 14),
+                        Text(
+                          _pages[index].title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 38,
+                            height: 1.2,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          _pages[index].body,
+                          style: const TextStyle(
+                              color: Colors.white70, height: 1.7, fontSize: 15),
+                        ),
+                      ],
                     ),
-                    child: const Text('تصفّح المنيو أولاً',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 26),
+                  Row(
+                    children: [
+                      for (var i = 0; i < _pages.length; i++)
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          margin: const EdgeInsets.only(left: 6),
+                          width: index == i ? 28 : 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: index == i
+                                ? AppColors.primary
+                                : Colors.white30,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      const Spacer(),
+                      if (!last)
+                        Pressable(
+                          onTap: () => _controller.nextPage(
+                            duration: const Duration(milliseconds: 550),
+                            curve: Curves.easeInOutCubic,
+                          ),
+                          child: SizedBox(
+                            width: 70,
+                            height: 70,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 70,
+                                  height: 70,
+                                  child: CircularProgressIndicator(
+                                    value: (_page + 1) / _pages.length,
+                                    strokeWidth: 3,
+                                    color: AppColors.accent,
+                                    backgroundColor: Colors.white24,
+                                  ),
+                                ),
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    gradient: AppColors.fire,
+                                    shape: BoxShape.circle,
+                                    boxShadow: glowShadow(),
+                                  ),
+                                  child: const Icon(Icons.arrow_back_rounded,
+                                      color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 350),
+                    curve: Curves.easeOutCubic,
+                    child: last
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 22),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () =>
+                                      _finish(const LoginScreen()),
+                                  child: const Text('تسجيل الدخول'),
+                                ),
+                                const SizedBox(height: 12),
+                                OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    minimumSize: const Size.fromHeight(54),
+                                    side: const BorderSide(
+                                        color: Colors.white38),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                  ),
+                                  onPressed: () => _finish(const MainShell()),
+                                  child: const Text('تصفّح المنيو أولاً',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w800)),
+                                ),
+                              ],
+                            ),
+                          )
+                        : const SizedBox(width: double.infinity),
                   ),
                 ],
               ),

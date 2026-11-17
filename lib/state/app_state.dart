@@ -38,10 +38,29 @@ class AppState extends ChangeNotifier {
   // المفضلة
   final Set<int> favorites = {};
 
+  // تفضيلات الطلب (تختارها من الرئيسية وتُستخدم في الدفع)
+  OrderType orderMode = OrderType.dineIn;
+  int? tableNumber;
+  String savedAddress = '';
+  bool onboardingSeen = false;
+
+  /// نهاية عرض اليوم (عدّاد تنازلي في الرئيسية).
+  final DateTime flashDealEnds = () {
+    final now = DateTime.now();
+    final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    return end.difference(now).inMinutes < 30
+        ? now.add(const Duration(hours: 3))
+        : end;
+  }();
+
   static const _kToken = 'customer_token';
   static const _kUser = 'customer_user';
   static const _kOrders = 'orders';
   static const _kFav = 'favorites';
+  static const _kMode = 'order_mode';
+  static const _kTable = 'table_number';
+  static const _kAddress = 'saved_address';
+  static const _kOnboarding = 'onboarding_seen';
 
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -61,6 +80,12 @@ class AppState extends ChangeNotifier {
     }
     favorites.addAll(
         (prefs.getStringList(_kFav) ?? const []).map(int.parse));
+    orderMode = prefs.getString(_kMode) == 'delivery'
+        ? OrderType.delivery
+        : OrderType.dineIn;
+    tableNumber = prefs.getInt(_kTable);
+    savedAddress = prefs.getString(_kAddress) ?? '';
+    onboardingSeen = prefs.getBool(_kOnboarding) ?? false;
     notifyListeners();
     await loadMenu();
   }
@@ -120,6 +145,40 @@ class AppState extends ChangeNotifier {
   }
 
   // ---------------------------------------------------------------------------
+  // تفضيلات الطلب
+  // ---------------------------------------------------------------------------
+
+  Future<void> setOrderMode(OrderType mode) async {
+    orderMode = mode;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kMode, mode.apiValue);
+  }
+
+  Future<void> setTable(int? table) async {
+    tableNumber = table;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    if (table == null) {
+      await prefs.remove(_kTable);
+    } else {
+      await prefs.setInt(_kTable, table);
+    }
+  }
+
+  Future<void> saveAddress(String address) async {
+    savedAddress = address;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kAddress, address);
+  }
+
+  Future<void> markOnboardingSeen() async {
+    onboardingSeen = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kOnboarding, true);
+  }
+
+  // ---------------------------------------------------------------------------
   // المفضلة
   // ---------------------------------------------------------------------------
 
@@ -140,24 +199,50 @@ class AppState extends ChangeNotifier {
   int get cartCount => cart.fold(0, (s, l) => s + l.quantity);
   double get cartSubtotal => cart.fold(0.0, (s, l) => s + l.total);
 
-  int quantityOf(MenuItem item) {
-    for (final l in cart) {
-      if (l.item.id == item.id) return l.quantity;
-    }
-    return 0;
-  }
+  int quantityOf(MenuItem item) => cart
+      .where((l) => l.item.id == item.id)
+      .fold(0, (s, l) => s + l.quantity);
 
-  void addToCart(MenuItem item, {int quantity = 1, String note = ''}) {
+  /// يزيد مرة كل إضافة (لتحريك أيقونة السلة).
+  int cartPulse = 0;
+
+  void addToCart(
+    MenuItem item, {
+    int quantity = 1,
+    String note = '',
+    ItemOption? size,
+    List<ItemOption> extras = const [],
+    int? spice,
+  }) {
+    final line = CartLine(
+      item: item,
+      quantity: quantity,
+      note: note,
+      size: size,
+      extras: extras,
+      spice: spice,
+    );
+    cartPulse++;
     for (final l in cart) {
-      if (l.item.id == item.id) {
+      if (l.key == line.key) {
         l.quantity += quantity;
         if (note.isNotEmpty) l.note = note;
         notifyListeners();
         return;
       }
     }
-    cart.add(CartLine(item: item, quantity: quantity, note: note));
+    cart.add(line);
     notifyListeners();
+  }
+
+  /// يُنقص صنفاً بسيطاً (بدون خيارات) — يُستخدم من بطاقات المنيو.
+  void decrementItem(MenuItem item) {
+    for (final l in cart.reversed) {
+      if (l.item.id == item.id) {
+        changeQuantity(l, -1);
+        return;
+      }
+    }
   }
 
   void changeQuantity(CartLine line, int delta) {
@@ -240,8 +325,18 @@ class AppState extends ChangeNotifier {
     if (cart.isEmpty) throw ApiException('السلة فارغة');
     final code = _newOrderCode();
     final lines = cart
-        .map((l) => CartLine(item: l.item, quantity: l.quantity, note: l.note))
+        .map((l) => CartLine(
+              item: l.item,
+              quantity: l.quantity,
+              note: l.note,
+              size: l.size,
+              extras: l.extras,
+              spice: l.spice,
+            ))
         .toList();
+    if (type == OrderType.delivery && address != null) {
+      await saveAddress(address);
+    }
     final fee = type == OrderType.delivery ? AppConfig.deliveryFee : 0.0;
 
     var bookingIds = <int>[];

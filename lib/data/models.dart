@@ -148,14 +148,104 @@ class MenuItem {
   }
 }
 
+/// خيار حجم أو إضافة مع فرق السعر.
+class ItemOption {
+  final String id;
+  final String label;
+  final double price;
+  final String? hint;
+
+  const ItemOption(this.id, this.label, this.price, {this.hint});
+}
+
+/// خيارات التخصيص حسب نوع الصنف.
+class ItemOptions {
+  ItemOptions._();
+
+  static const sizes = [
+    ItemOption('regular', 'عادي', 0),
+    ItemOption('large', 'كبير', 6, hint: '+30%'),
+    ItemOption('xl', 'عائلي', 14, hint: 'يكفي 2'),
+  ];
+
+  static const extras = [
+    ItemOption('cheese', 'جبنة شيدر', 3),
+    ItemOption('garlic', 'صوص ثوم', 2),
+    ItemOption('spicy', 'صوص حار', 2),
+    ItemOption('fries', 'بطاطا جانبية', 8),
+    ItemOption('drink', 'مشروب بارد', 5),
+  ];
+
+  static const sweetExtras = [
+    ItemOption('icecream', 'بولة آيس كريم', 5),
+    ItemOption('choco', 'صوص شوكولاتة', 3),
+    ItemOption('nuts', 'مكسرات', 3),
+  ];
+
+  static const spiceLevels = ['بدون', 'خفيف', 'وسط', 'حار', 'نار 🔥'];
+
+  static String _kind(MenuItem item) {
+    final c = '${item.categoryName ?? ''} ${item.name}';
+    if (c.contains('مشروب') || c.contains('عصير') || c.contains('موهيتو') || c.contains('غازي')) {
+      return 'drink';
+    }
+    if (c.contains('حلو') || c.contains('كيك') || c.contains('براونيز') || c.contains('تارت')) {
+      return 'sweet';
+    }
+    return 'food';
+  }
+
+  static List<ItemOption> sizesFor(MenuItem item) =>
+      _kind(item) == 'sweet' ? const [] : sizes;
+
+  static List<ItemOption> extrasFor(MenuItem item) {
+    switch (_kind(item)) {
+      case 'drink':
+        return const [];
+      case 'sweet':
+        return sweetExtras;
+      default:
+        return extras;
+    }
+  }
+
+  static bool hasSpice(MenuItem item) => _kind(item) == 'food';
+}
+
 class CartLine {
   final MenuItem item;
   int quantity;
   String note;
+  final ItemOption? size;
+  final List<ItemOption> extras;
+  final int? spice;
 
-  CartLine({required this.item, this.quantity = 1, this.note = ''});
+  CartLine({
+    required this.item,
+    this.quantity = 1,
+    this.note = '',
+    this.size,
+    this.extras = const [],
+    this.spice,
+  });
 
-  double get total => item.finalPrice * quantity;
+  double get unitPrice =>
+      item.finalPrice +
+      (size?.price ?? 0) +
+      extras.fold(0.0, (s, e) => s + e.price);
+
+  double get total => unitPrice * quantity;
+
+  /// مفتاح لدمج الأسطر المتطابقة في السلة.
+  String get key =>
+      '${item.id}|${size?.id}|${extras.map((e) => e.id).join(',')}|$spice';
+
+  /// وصف مختصر للخيارات (يظهر في السلة ويرسل للمطبخ).
+  String get optionsSummary => [
+        if (size != null && size!.price > 0) size!.label,
+        ...extras.map((e) => e.label),
+        if (spice != null) 'حرارة: ${ItemOptions.spiceLevels[spice!]}',
+      ].join(' • ');
 }
 
 enum OrderType { dineIn, delivery }
@@ -255,10 +345,13 @@ class PlacedOrder {
             .map((l) => {
                   'id': l.item.id,
                   'name': l.item.name,
-                  'price': l.item.finalPrice,
+                  'price': l.unitPrice,
+                  'category': l.item.categoryName,
                   'image': l.item.imageUrl,
                   'quantity': l.quantity,
-                  'note': l.note,
+                  'note': [l.optionsSummary, l.note]
+                      .where((e) => e.isNotEmpty)
+                      .join(' — '),
                 })
             .toList(),
       };
@@ -276,6 +369,7 @@ class PlacedOrder {
           description: '',
           price: _toDouble(m['price']),
           imageUrl: (m['image'] ?? '').toString(),
+          categoryName: m['category']?.toString(),
         ),
         quantity: _toInt(m['quantity']),
         note: (m['note'] ?? '').toString(),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../core/config.dart';
 import '../core/theme.dart';
+import '../data/demo_menu.dart';
+import '../widgets/animations.dart';
 import '../state/app_state.dart';
 import '../widgets/common.dart';
 import 'checkout_screen.dart';
@@ -27,36 +29,34 @@ class CartScreen extends StatelessWidget {
       ),
       body: cart.isEmpty
           ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('🛒', style: TextStyle(fontSize: 64)),
-                    const SizedBox(height: 12),
-                    const Text('سلتك فاضية',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 6),
-                    const Text('أضف وجباتك المفضّلة وارجع لهون',
-                        style: TextStyle(color: AppColors.muted)),
-                    const SizedBox(height: 22),
-                    SizedBox(
-                      width: 200,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('تصفّح المنيو'),
-                      ),
-                    ),
-                  ],
-                ),
+              child: EmptyState(
+                image: img('burger_fries'),
+                title: 'سلتك فاضية',
+                subtitle: 'أضف وجباتك المفضّلة وارجع لهون 🍔',
+                action: 'تصفّح المنيو',
+                onAction: () => Navigator.pop(context),
               ),
             )
           : ListView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               children: [
                 for (final line in cart)
-                  Container(
+                  Dismissible(
+                    key: ObjectKey(line),
+                    direction: DismissDirection.endToStart,
+                    onDismissed: (_) => state.removeLine(line),
+                    background: Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      alignment: AlignmentDirectional.centerEnd,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.fire,
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      child: const Icon(Icons.delete_sweep_rounded,
+                          color: Colors.white, size: 28),
+                    ),
+                    child: Container(
                     margin: const EdgeInsets.only(bottom: 14),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -89,6 +89,14 @@ class CartScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
+                              if (line.optionsSummary.isNotEmpty)
+                                Text(line.optionsSummary,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w700)),
                               if (line.note.isNotEmpty)
                                 Text('📝 ${line.note}',
                                     maxLines: 1,
@@ -120,6 +128,7 @@ class CartScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+                  ),
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.all(18),
@@ -149,7 +158,7 @@ class CartScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const CheckoutScreen()),
+                    SmoothRoute<void>(builder: (_) => const CheckoutScreen()),
                   ),
                   child: Text(
                       'متابعة الطلب • ${money(state.cartSubtotal, state.currency)}'),

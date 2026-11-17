@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/theme.dart';
 import '../state/app_state.dart';
+import '../widgets/animations.dart';
 import '../widgets/common.dart';
 import 'search_screen.dart';
 
@@ -119,9 +120,10 @@ class _MenuScreenState extends State<MenuScreen> {
                       ],
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 170),
                       itemCount: items.length,
-                      itemBuilder: (_, i) => FoodTile(item: items[i]),
+                      itemBuilder: (_, i) =>
+                          FadeSlideIn(index: i, child: FoodTile(item: items[i])),
                     ),
             ),
           ),

@@ -13,7 +13,17 @@ class AppColors {
   static const Color muted = Color(0xFF8A7B75);
   static const Color border = Color(0xFFF1E4DA);
   static const Color success = Color(0xFF2E9E5B);
+  static const Color cream = Color(0xFFFFEFE2);
+  static const Color ink = Color(0xFF1C1210);
+
+  static const LinearGradient fire = LinearGradient(
+    begin: Alignment.topRight,
+    end: Alignment.bottomLeft,
+    colors: [Color(0xFFEF4136), Color(0xFFB71C1C)],
+  );
 }
+
+const String kFont = 'Tajawal';
 
 class AppTheme {
   AppTheme._();
@@ -21,6 +31,7 @@ class AppTheme {
   static ThemeData get light {
     final base = ThemeData(
       useMaterial3: true,
+      fontFamily: kFont,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         primary: AppColors.primary,
@@ -35,10 +46,14 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
+          fontFamily: kFont,
           color: AppColors.text,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
+          fontSize: 19,
+          fontWeight: FontWeight.w800,
         ),
+      ),
+      snackBarTheme: const SnackBarThemeData(
+        contentTextStyle: TextStyle(fontFamily: kFont, color: Colors.white),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -66,9 +81,11 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
           ),
+          elevation: 0,
           textStyle: const TextStyle(
+            fontFamily: kFont,
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ),
@@ -82,6 +99,15 @@ List<BoxShadow> softShadow() => [
         color: const Color(0xFF9B1C1C).withValues(alpha: 0.07),
         blurRadius: 18,
         offset: const Offset(0, 8),
+      ),
+    ];
+
+/// ظل ملوّن أعمق للعناصر البارزة.
+List<BoxShadow> glowShadow([Color color = AppColors.primary]) => [
+      BoxShadow(
+        color: color.withValues(alpha: 0.35),
+        blurRadius: 22,
+        offset: const Offset(0, 10),
       ),
     ];
 

@@ -15,7 +15,7 @@ class OffersScreen extends StatelessWidget {
     return SafeArea(
       bottom: false,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 170),
         children: [
           const Text('العروض',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),

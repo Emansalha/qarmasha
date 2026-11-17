@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../data/models.dart';
 import '../state/app_state.dart';
+import '../widgets/animations.dart';
 import 'orders_screen.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
@@ -20,15 +21,25 @@ class OrderSuccessScreen extends StatelessWidget {
           child: Column(
             children: [
               const Spacer(),
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 900),
+                curve: Curves.elasticOut,
+                builder: (context, v, child) =>
+                    Transform.scale(scale: v, child: child),
+                child: Container(
+                  width: 130,
+                  height: 130,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF3CC37A), AppColors.success],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: glowShadow(AppColors.success),
+                  ),
+                  child: const Icon(Icons.check_rounded,
+                      color: Colors.white, size: 80),
                 ),
-                child: const Icon(Icons.check_circle_rounded,
-                    color: AppColors.success, size: 80),
               ),
               const SizedBox(height: 24),
               const Text('تم استلام طلبك! 🎉',
@@ -62,7 +73,7 @@ class OrderSuccessScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () => Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(
+                  SmoothRoute<void>(
                       builder: (_) => OrderDetailsScreen(order: order)),
                 ),
                 child: const Text('تتبّع الطلب'),
