@@ -23,6 +23,7 @@ for (const s of screens) {
   await page.screenshot({ path: `shots/${s}.png` });
   console.log('shot', s);
   if (s === 'home') {
+    await page.mouse.move(195, 140);
     await page.mouse.wheel(0, 900);
     await page.waitForTimeout(2500);
     await page.screenshot({ path: `shots/home_2.png` });
@@ -34,6 +35,7 @@ for (const s of screens) {
     await page.screenshot({ path: `shots/home_4.png` });
   }
   if (s === 'item') {
+    await page.mouse.move(195, 500);
     await page.mouse.wheel(0, 700);
     await page.waitForTimeout(2000);
     await page.screenshot({ path: `shots/item_2.png` });

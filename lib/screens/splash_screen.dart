@@ -368,6 +368,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   ),
                   const Spacer(),
                   SizedBox(
+                    width: double.infinity,
                     height: 175,
                     child: Stack(
                       clipBehavior: Clip.none,
@@ -402,8 +403,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         ),
                         // بطاقة صورة مائلة في المساحة الفارغة يسار السطرين الأولين
                         Positioned(
-                          left: 2,
-                          top: 44,
+                          left: 0,
+                          top: 30,
                           child: AnimatedBuilder(
                             animation: _float,
                             builder: (context, child) => Transform.translate(
@@ -413,8 +414,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   child: child),
                             ),
                             child: Container(
-                              width: 90,
-                              height: 100,
+                              width: 104,
+                              height: 116,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(24),
                                 border: Border.all(
