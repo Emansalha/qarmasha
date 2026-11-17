@@ -368,7 +368,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   ),
                   const Spacer(),
                   SizedBox(
-                    height: 200,
+                    height: 175,
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
@@ -380,8 +380,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             TextSpan(
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 56,
-                                height: 1.08,
+                                fontSize: 50,
+                                height: 1.1,
                                 fontWeight: FontWeight.w900,
                               ),
                               children: [
@@ -389,7 +389,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 TextSpan(text: 'كُل. '),
                                 WidgetSpan(
                                   alignment: PlaceholderAlignment.middle,
-                                  child: Icon3D('yum', size: 50),
+                                  child: Icon3D('yum', size: 46),
                                 ),
                                 TextSpan(text: '\n'),
                                 TextSpan(
@@ -402,8 +402,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         ),
                         // بطاقة صورة مائلة في المساحة الفارغة يسار السطرين الأولين
                         Positioned(
-                          left: 6,
-                          top: 0,
+                          left: 2,
+                          top: 44,
                           child: AnimatedBuilder(
                             animation: _float,
                             builder: (context, child) => Transform.translate(
@@ -413,8 +413,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                   child: child),
                             ),
                             child: Container(
-                              width: 104,
-                              height: 112,
+                              width: 90,
+                              height: 100,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(24),
                                 border: Border.all(

@@ -236,7 +236,7 @@ class HomeScreen extends StatelessWidget {
                 icon: 'star',
                 onSeeAll: () => onOpenMenu(null)),
             SizedBox(
-              height: 300,
+              height: 262,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding:
