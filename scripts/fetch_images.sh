@@ -20,3 +20,18 @@ for w in Regular Medium Bold ExtraBold Black; do
   curl -fsSL -o "$out" "https://raw.githubusercontent.com/google/fonts/main/ofl/tajawal/Tajawal-${w}.ttf"
   echo "OK $out ($(stat -c%s "$out") bytes)"
 done
+
+# أيقونات ثلاثية الأبعاد (Microsoft Fluent Emoji — رخصة MIT)
+mkdir -p assets/icons
+while IFS='|' read -r name folder; do
+  [ -z "${name:-}" ] && continue
+  out="assets/icons/${name}.png"
+  [ -s "$out" ] && continue
+  file="$(echo "$folder" | tr '[:upper:]' '[:lower:]' | tr ' ' '_')_3d.png"
+  url="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/${folder// /%20}/3D/${file}"
+  if curl -fsSL -o "$out" "$url"; then
+    echo "OK $out"
+  else
+    rm -f "$out"; echo "MISSING $name ($folder)"
+  fi
+done < scripts/icons.txt

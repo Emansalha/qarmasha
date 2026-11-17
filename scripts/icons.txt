@@ -1,0 +1,48 @@
+home|House
+menu|Bento box
+orders|Receipt
+offers|Wrapped gift
+profile|Bust in silhouette
+bell|Bell
+cart|Shopping bags
+search|Magnifying glass tilted left
+heart|Red heart
+fire|Fire
+star|Star
+stopwatch|Stopwatch
+pepper|Hot pepper
+dinein|Fork and knife with plate
+delivery|Motor scooter
+pin|Round pushpin
+table|Chair
+cash|Dollar banknote
+card|Credit card
+party|Party popper
+check|Check mark button
+hourglass|Hourglass not done
+store|Convenience store
+gear|Gear
+door|Door
+info|Information
+chicken|Poultry leg
+burger|Hamburger
+fries|French fries
+drink|Cup with straw
+dessert|Shortcake
+salad|Green salad
+cheese|Cheese wedge
+garlic|Garlic
+icecream|Soft ice cream
+chocolate|Chocolate bar
+nuts|Peanuts
+empty_cart|Shopping cart
+sparkles|Sparkles
+note|Memo
+phone|Mobile phone
+user|Bust in silhouette
+mail|Envelope
+lock|Locked
+refresh|Counterclockwise arrows button
+lightning|High voltage
+cook|Cooking
+trash|Wastebasket
