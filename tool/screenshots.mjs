@@ -3,7 +3,7 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 
 const base = process.env.BASE_URL || 'http://localhost:8080/';
-const screens = ['welcome', 'home', 'menu', 'item', 'cart', 'checkout', 'tracking', 'orders', 'offers', 'profile'];
+const screens = ['welcome', 'home', 'menu', 'item', 'cart', 'checkout', 'success', 'tracking', 'orders', 'offers', 'profile'];
 fs.mkdirSync('shots', { recursive: true });
 
 const browser = await chromium.launch({

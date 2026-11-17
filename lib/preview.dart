@@ -7,6 +7,7 @@ import 'screens/cart_screen.dart';
 import 'screens/checkout_screen.dart';
 import 'screens/item_details_screen.dart';
 import 'screens/main_shell.dart';
+import 'screens/order_success_screen.dart';
 import 'screens/orders_screen.dart';
 import 'screens/splash_screen.dart';
 import 'state/app_state.dart';
@@ -45,7 +46,7 @@ class _PreviewLauncherState extends State<PreviewLauncher> {
       state.addToCart(byId(101));
       state.addToCart(byId(501), quantity: 2);
     }
-    if (widget.screen == 'orders' || widget.screen == 'tracking') {
+    if (const ['orders', 'tracking', 'success'].contains(widget.screen)) {
       state.addToCart(byId(301), quantity: 2);
       state.addToCart(byId(401));
       await state.checkout(
@@ -81,6 +82,9 @@ class _PreviewLauncherState extends State<PreviewLauncher> {
         break;
       case 'checkout':
         screen = const CheckoutScreen();
+        break;
+      case 'success':
+        screen = OrderSuccessScreen(order: state.orders.first);
         break;
       case 'tracking':
         screen = OrderDetailsScreen(order: state.orders.first);

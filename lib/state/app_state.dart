@@ -372,6 +372,7 @@ class AppState extends ChangeNotifier {
       lines: lines,
       subtotal: lines.fold(0.0, (s, l) => s + l.total),
       deliveryFee: fee,
+      etaMinutes: _estimateEta(lines, type),
       bookingIds: bookingIds,
       status: canSendToApi ? OrderStatus.pending : OrderStatus.preparing,
     );
@@ -380,6 +381,18 @@ class AppState extends ChangeNotifier {
     await _saveOrders();
     notifyListeners();
     return order;
+  }
+
+  /// تقدير وقت الوصول: أطول وقت تحضير بين الأصناف + وقت التقديم/التوصيل
+  /// + دقيقة لكل 3 قطع إضافية.
+  int _estimateEta(List<CartLine> lines, OrderType type) {
+    final prep = lines.fold<int>(
+        0, (m, l) => l.item.prepMinutes > m ? l.item.prepMinutes : m);
+    final pieces = lines.fold<int>(0, (s, l) => s + l.quantity);
+    final extra = (pieces / 3).floor();
+    return type == OrderType.dineIn
+        ? (prep + 3 + extra).clamp(8, 45).toInt()
+        : (prep + 25 + extra).clamp(25, 75).toInt();
   }
 
   Future<void> _saveOrders() async {

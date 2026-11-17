@@ -305,6 +305,9 @@ class PlacedOrder {
   final double subtotal;
   final double deliveryFee;
   final List<int> bookingIds;
+
+  /// الوقت المتوقع (بالدقائق) حتى يصل الطلب للطاولة أو للعنوان.
+  final int etaMinutes;
   OrderStatus status;
 
   PlacedOrder({
@@ -321,10 +324,27 @@ class PlacedOrder {
     this.notes = '',
     this.paymentMethod = 'cash',
     this.bookingIds = const [],
+    this.etaMinutes = 15,
     this.status = OrderStatus.pending,
   });
 
   double get total => subtotal + deliveryFee;
+
+  /// وقت الوصول المتوقع.
+  DateTime get eta => createdAt.add(Duration(minutes: etaMinutes));
+
+  /// الوقت المتبقي حتى الوصول (صفر إذا وصل).
+  Duration get remaining {
+    final r = eta.difference(DateTime.now());
+    return r.isNegative ? Duration.zero : r;
+  }
+
+  /// نص الوقت بصيغة 12 ساعة بالعربي (مثل 10:35 م).
+  static String clock(DateTime t) {
+    final h = t.hour % 12 == 0 ? 12 : t.hour % 12;
+    final m = t.minute.toString().padLeft(2, '0');
+    return '$h:$m ${t.hour < 12 ? 'ص' : 'م'}';
+  }
 
   String get destination => type == OrderType.dineIn
       ? 'طاولة رقم ${tableNumber ?? '-'}'
@@ -343,6 +363,7 @@ class PlacedOrder {
         'subtotal': subtotal,
         'delivery_fee': deliveryFee,
         'booking_ids': bookingIds,
+        'eta_minutes': etaMinutes,
         'status': status.name,
         'lines': lines
             .map((l) => {
@@ -392,6 +413,9 @@ class PlacedOrder {
       paymentMethod: (json['payment_method'] ?? 'cash').toString(),
       subtotal: _toDouble(json['subtotal']),
       deliveryFee: _toDouble(json['delivery_fee']),
+      etaMinutes: json['eta_minutes'] == null
+          ? (type == OrderType.dineIn ? 15 : 40)
+          : _toInt(json['eta_minutes']),
       bookingIds: (json['booking_ids'] as List? ?? const [])
           .map((e) => _toInt(e))
           .toList(),

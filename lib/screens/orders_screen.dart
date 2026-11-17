@@ -105,9 +105,31 @@ class _OrderCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                      '${order.lines.fold<int>(0, (s, l) => s + l.quantity)} صنف • ${money(order.total, state.currency)}',
-                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                            '${order.lines.fold<int>(0, (s, l) => s + l.quantity)} صنف • ${money(order.total, state.currency)}',
+                            style: const TextStyle(fontWeight: FontWeight.w700)),
+                      ),
+                      if (order.status != OrderStatus.cancelled &&
+                          order.remaining > Duration.zero)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                              'يصل خلال ${order.remaining.inMinutes + 1} د',
+                              style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w900)),
+                        ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -325,13 +347,12 @@ class _EtaRingState extends State<EtaRing> with SingleTickerProviderStateMixin {
     ..repeat();
   Timer? _timer;
 
-  int get _totalMinutes =>
-      widget.order.type == OrderType.dineIn ? 15 : 40;
+  int get _totalMinutes => widget.order.etaMinutes;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 20), (_) {
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
       if (mounted) setState(() {});
     });
   }
