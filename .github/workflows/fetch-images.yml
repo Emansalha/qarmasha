@@ -1,0 +1,24 @@
+name: Fetch food images
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [scripts/images.txt, scripts/fetch_images.sh]
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/fetch_images.sh
+      - name: Commit images
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/images
+          git diff --cached --quiet || git commit -m "إضافة صور الأطعمة الحقيقية إلى assets"
+          git push
