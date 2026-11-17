@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -37,6 +39,20 @@ jobs:
         with:
           name: qarmasha-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Rename APK
+        run: cp build/app/outputs/flutter-apk/app-release.apk build/qarmasha.apk
+
+      - name: Publish APK to GitHub Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "قرمشة — آخر نسخة"
+          body: "حمّل ملف qarmasha.apk على هاتف Android وثبّته."
+          prerelease: false
+          make_latest: true
+          files: build/qarmasha.apk
 
       - name: Upload web build
         uses: actions/upload-pages-artifact@v3
