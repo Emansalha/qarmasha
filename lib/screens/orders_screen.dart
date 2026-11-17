@@ -424,8 +424,8 @@ class _EtaRingState extends State<EtaRing> with SingleTickerProviderStateMixin {
                 const SizedBox(height: 6),
                 Text(
                   dineIn
-                      ? 'سيصل طلبك إلى الطاولة رقم ${widget.order.tableNumber} خلال دقائق.'
-                      : 'الوقت المتوقع للوصول إلى عنوانك.',
+                      ? 'يصل إلى الطاولة رقم ${widget.order.tableNumber} حوالي الساعة ${PlacedOrder.clock(widget.order.eta)}'
+                      : 'يصل إلى عنوانك حوالي الساعة ${PlacedOrder.clock(widget.order.eta)}',
                   style: const TextStyle(color: Colors.white70, height: 1.5),
                 ),
               ],
