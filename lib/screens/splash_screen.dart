@@ -338,7 +338,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   colors: [
                     Color(0x88000000),
                     Colors.transparent,
-                    Color(0xDD131313),
+                    Color(0xDD1A1A1C),
                     AppColors.background,
                   ],
                   stops: [0, 0.22, 0.5, 0.62],
@@ -368,11 +368,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   ),
                   const Spacer(),
                   SizedBox(
-                    height: 250,
+                    height: 200,
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        // العنوان الضخم
+                        // العنوان الضخم مع إيموجي داخل السطر
                         const FadeSlideIn(
                           index: 1,
                           offset: 40,
@@ -380,13 +380,18 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             TextSpan(
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 60,
-                                height: 1.05,
+                                fontSize: 56,
+                                height: 1.08,
                                 fontWeight: FontWeight.w900,
                               ),
                               children: [
                                 TextSpan(text: 'قرمِش.\n'),
-                                TextSpan(text: 'كُل.\n'),
+                                TextSpan(text: 'كُل. '),
+                                WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  child: Icon3D('yum', size: 50),
+                                ),
+                                TextSpan(text: '\n'),
                                 TextSpan(
                                   text: 'استمتع!',
                                   style: TextStyle(color: AppColors.primary),
@@ -395,35 +400,21 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ),
                           ),
                         ),
-                        // إيموجي ثلاثي الأبعاد
+                        // بطاقة صورة مائلة في المساحة الفارغة يسار السطرين الأولين
                         Positioned(
-                          top: 70,
-                          left: 120,
-                          child: AnimatedBuilder(
-                            animation: _float,
-                            builder: (context, child) => Transform.rotate(
-                              angle: -0.15 + 0.3 * _float.value,
-                              child: child,
-                            ),
-                            child: const BounceIn(
-                                active: true, child: Icon3D('yum', size: 54)),
-                          ),
-                        ),
-                        // بطاقة صورة مائلة
-                        Positioned(
-                          left: 0,
-                          bottom: 10,
+                          left: 6,
+                          top: 0,
                           child: AnimatedBuilder(
                             animation: _float,
                             builder: (context, child) => Transform.translate(
-                              offset: Offset(0, -6 * _float.value),
+                              offset: Offset(0, -5 * _float.value),
                               child: Transform.rotate(
-                                  angle: 0.1 - 0.04 * _float.value,
+                                  angle: -0.1 + 0.04 * _float.value,
                                   child: child),
                             ),
                             child: Container(
-                              width: 120,
-                              height: 140,
+                              width: 104,
+                              height: 112,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(24),
                                 border: Border.all(

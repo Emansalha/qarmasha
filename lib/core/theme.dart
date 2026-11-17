@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFFFF6B35);
+  static const Color primary = Color(0xFFFF6A3D);
   static const Color primaryDark = Color(0xFFE04E1A);
   static const Color accent = Color(0xFFFFB547);
-  static const Color background = Color(0xFF131313);
-  static const Color surface = Color(0xFF1E1E1E);
-  static const Color surface2 = Color(0xFF2A2A2A);
+  static const Color background = Color(0xFF1A1A1C);
+  static const Color surface = Color(0xFF262628);
+  static const Color surface2 = Color(0xFF323235);
   static const Color text = Color(0xFFF6F6F6);
   static const Color muted = Color(0xFF9B9B9B);
-  static const Color border = Color(0xFF2F2F2F);
+  static const Color border = Color(0xFF3A3A3D);
   static const Color success = Color(0xFF34C77B);
-  static const Color cream = Color(0xFF2A2A2A);
-  static const Color ink = Color(0xFF262626);
+  static const Color cream = Color(0xFF323235);
+  static const Color ink = Color(0xFF2C2C2F);
 
   static const LinearGradient fire = LinearGradient(
     begin: Alignment.topRight,

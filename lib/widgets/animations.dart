@@ -538,7 +538,7 @@ class _SwipeToStartState extends State<SwipeToStart>
                     for (var i = 0; i < 3; i++)
                       Opacity(
                         opacity: (((_hint.value * 3) - i) % 3 < 1) ? 1.0 : 0.35,
-                        child: const Icon(Icons.chevron_left_rounded,
+                        child: const Icon(Icons.chevron_right_rounded,
                             color: Colors.white, size: 22),
                       ),
                   ],
@@ -581,7 +581,7 @@ class _SwipeToStartState extends State<SwipeToStart>
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    p > 0.9 ? Icons.check_rounded : Icons.arrow_back_rounded,
+                    p > 0.9 ? Icons.check_rounded : Icons.arrow_forward_rounded,
                     color: Colors.white,
                   ),
                 ),

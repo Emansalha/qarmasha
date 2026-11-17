@@ -29,6 +29,9 @@ for (const s of screens) {
     await page.mouse.wheel(0, 900);
     await page.waitForTimeout(2500);
     await page.screenshot({ path: `shots/home_3.png` });
+    await page.mouse.wheel(0, 1100);
+    await page.waitForTimeout(2500);
+    await page.screenshot({ path: `shots/home_4.png` });
   }
   if (s === 'item') {
     await page.mouse.wheel(0, 700);
