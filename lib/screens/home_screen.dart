@@ -10,6 +10,7 @@ import '../state/app_state.dart';
 import '../widgets/animations.dart';
 import '../widgets/common.dart';
 import '../widgets/flame_logo.dart';
+import '../widgets/icon3d.dart';
 import '../widgets/table_picker.dart';
 import 'search_screen.dart';
 
@@ -81,6 +82,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     CircleIconButton(
                       icon: Icons.notifications_none_rounded,
+                      image: 'bell',
                       badge: state.orders
                           .where((o) =>
                               o.status == OrderStatus.preparing ||
@@ -143,8 +145,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                           child: const Row(
                             children: [
-                              Icon(Icons.search_rounded,
-                                  color: AppColors.primary),
+                              Icon3D('search', size: 24),
                               SizedBox(width: 10),
                               Text('ابحث عن وجبة، برجر، حلويات...',
                                   style: TextStyle(color: AppColors.muted)),
@@ -192,7 +193,8 @@ class HomeScreen extends StatelessWidget {
             ),
 
             // ===== التصنيفات =====
-            SectionHeader('التصنيفات', onSeeAll: () => onOpenMenu(null)),
+            SectionHeader('التصنيفات',
+                icon: 'menu', onSeeAll: () => onOpenMenu(null)),
             SizedBox(
               height: 104,
               child: ListView(
@@ -225,7 +227,7 @@ class HomeScreen extends StatelessWidget {
             // ===== المميزة =====
             SectionHeader('الأطباق المميزة',
                 subtitle: 'اختارها الشيف لك اليوم',
-                emoji: '⭐',
+                icon: 'star',
                 onSeeAll: () => onOpenMenu(null)),
             SizedBox(
               height: 300,
@@ -245,7 +247,7 @@ class HomeScreen extends StatelessWidget {
 
             // ===== لوحة الشيف (Bento) =====
             if (chef.length == 3) ...[
-              const SectionHeader('توصيات الشيف', emoji: '👨‍🍳'),
+              const SectionHeader('توصيات الشيف', icon: 'cook'),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: SizedBox(
@@ -271,7 +273,7 @@ class HomeScreen extends StatelessWidget {
 
             // ===== الأكثر طلباً =====
             const SectionHeader('الأكثر طلباً',
-                subtitle: 'الأصناف اللي الكل بيحبها', emoji: '🔥'),
+                subtitle: 'الأصناف اللي الكل بيحبها', icon: 'fire'),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
@@ -326,11 +328,7 @@ class HomeScreen extends StatelessWidget {
                 for (final o in active)
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const CircleAvatar(
-                      backgroundColor: AppColors.cream,
-                      child: Icon(Icons.local_fire_department,
-                          color: AppColors.primary),
-                    ),
+                    leading: const IconTile('cook'),
                     title: Text('طلب #${o.code} — ${o.status.label}',
                         style: const TextStyle(fontWeight: FontWeight.w700)),
                     subtitle: Text(o.destination),
@@ -351,7 +349,7 @@ class OrderModeSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
     final dineIn = state.orderMode == OrderType.dineIn;
-    Widget option(OrderType type, IconData icon, String label) {
+    Widget option(OrderType type, String image, String label) {
       final sel = state.orderMode == type;
       return Expanded(
         child: GestureDetector(
@@ -362,8 +360,12 @@ class OrderModeSwitch extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon,
-                    size: 20, color: sel ? Colors.white : AppColors.muted),
+                AnimatedScale(
+                  scale: sel ? 1.15 : 0.95,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutBack,
+                  child: Icon3D(image, size: 24, grayscale: !sel),
+                ),
                 const SizedBox(width: 6),
                 AnimatedDefaultTextStyle(
                   duration: const Duration(milliseconds: 200),
@@ -411,10 +413,8 @@ class OrderModeSwitch extends StatelessWidget {
               ),
               Row(
                 children: [
-                  option(OrderType.dineIn, Icons.table_restaurant_rounded,
-                      'داخل المطعم'),
-                  option(OrderType.delivery, Icons.delivery_dining_rounded,
-                      'توصيل'),
+                  option(OrderType.dineIn, 'dinein', 'داخل المطعم'),
+                  option(OrderType.delivery, 'delivery', 'توصيل'),
                 ],
               ),
             ],
@@ -435,13 +435,7 @@ class OrderModeSwitch extends StatelessWidget {
                 child: Row(
                   key: ValueKey('$dineIn-${state.tableNumber}'),
                   children: [
-                    Icon(
-                      dineIn
-                          ? Icons.event_seat_rounded
-                          : Icons.location_on_rounded,
-                      color: AppColors.primary,
-                      size: 18,
-                    ),
+                    Icon3D(dineIn ? 'table' : 'pin', size: 20),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
@@ -790,8 +784,8 @@ class _FlashDeal extends StatelessWidget {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.bolt_rounded,
-                                color: AppColors.accent, size: 18),
+                            Icon3D('lightning', size: 18),
+                            SizedBox(width: 4),
                             Text('عرض اليوم ينتهي خلال',
                                 style: TextStyle(
                                     color: AppColors.accent,

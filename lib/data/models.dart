@@ -155,7 +155,10 @@ class ItemOption {
   final double price;
   final String? hint;
 
-  const ItemOption(this.id, this.label, this.price, {this.hint});
+  /// اسم أيقونة 3D للخيار.
+  final String? icon;
+
+  const ItemOption(this.id, this.label, this.price, {this.hint, this.icon});
 }
 
 /// خيارات التخصيص حسب نوع الصنف.
@@ -169,17 +172,17 @@ class ItemOptions {
   ];
 
   static const extras = [
-    ItemOption('cheese', 'جبنة شيدر', 3),
-    ItemOption('garlic', 'صوص ثوم', 2),
-    ItemOption('spicy', 'صوص حار', 2),
-    ItemOption('fries', 'بطاطا جانبية', 8),
-    ItemOption('drink', 'مشروب بارد', 5),
+    ItemOption('cheese', 'جبنة شيدر', 3, icon: 'cheese'),
+    ItemOption('garlic', 'صوص ثوم', 2, icon: 'garlic'),
+    ItemOption('spicy', 'صوص حار', 2, icon: 'pepper'),
+    ItemOption('fries', 'بطاطا جانبية', 8, icon: 'fries'),
+    ItemOption('drink', 'مشروب بارد', 5, icon: 'drink'),
   ];
 
   static const sweetExtras = [
-    ItemOption('icecream', 'بولة آيس كريم', 5),
-    ItemOption('choco', 'صوص شوكولاتة', 3),
-    ItemOption('nuts', 'مكسرات', 3),
+    ItemOption('icecream', 'بولة آيس كريم', 5, icon: 'icecream'),
+    ItemOption('choco', 'صوص شوكولاتة', 3, icon: 'chocolate'),
+    ItemOption('nuts', 'مكسرات', 3, icon: 'nuts'),
   ];
 
   static const spiceLevels = ['بدون', 'خفيف', 'وسط', 'حار', 'نار 🔥'];

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../state/app_state.dart';
 import '../widgets/common.dart';
+import '../widgets/icon3d.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -52,7 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
               onChanged: (v) => setState(() => _query = v),
               decoration: InputDecoration(
                 hintText: 'ابحث عن وجبتك المفضّلة...',
-                prefixIcon: const Icon(Icons.search_rounded),
+                prefixIcon: const Padding(padding: EdgeInsets.all(11), child: Icon3D('search', size: 22)),
                 suffixIcon: _query.isEmpty
                     ? null
                     : IconButton(

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../core/config.dart';
 import '../core/theme.dart';
-import '../data/demo_menu.dart';
 import '../widgets/animations.dart';
+import '../widgets/icon3d.dart';
 import '../state/app_state.dart';
 import '../widgets/common.dart';
 import 'checkout_screen.dart';
@@ -30,7 +30,7 @@ class CartScreen extends StatelessWidget {
       body: cart.isEmpty
           ? Center(
               child: EmptyState(
-                image: img('burger_fries'),
+                image: 'icon:empty_cart',
                 title: 'سلتك فاضية',
                 subtitle: 'أضف وجباتك المفضّلة وارجع لهون 🍔',
                 action: 'تصفّح المنيو',
@@ -53,8 +53,7 @@ class CartScreen extends StatelessWidget {
                         gradient: AppColors.fire,
                         borderRadius: BorderRadius.circular(22),
                       ),
-                      child: const Icon(Icons.delete_sweep_rounded,
-                          color: Colors.white, size: 28),
+                      child: const Icon3D('trash', size: 32),
                     ),
                     child: Container(
                     margin: const EdgeInsets.only(bottom: 14),

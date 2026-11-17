@@ -4,6 +4,7 @@ import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../data/api_service.dart';
 import '../../state/app_state.dart';
+import '../../widgets/icon3d.dart';
 import 'owner_dashboard_screen.dart';
 
 /// دخول صاحب المطعم (POST /auth/login) لإدارة المنيو.
@@ -78,14 +79,14 @@ class _OwnerLoginScreenState extends State<OwnerLoginScreen> {
             textDirection: TextDirection.ltr,
             decoration: const InputDecoration(
                 hintText: 'البريد الإلكتروني',
-                prefixIcon: Icon(Icons.mail_outline)),
+                prefixIcon: const Padding(padding: EdgeInsets.all(11), child: Icon3D('mail', size: 22))),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _password,
             obscureText: true,
             decoration: const InputDecoration(
-                hintText: 'كلمة المرور', prefixIcon: Icon(Icons.lock_outline)),
+                hintText: 'كلمة المرور', prefixIcon: const Padding(padding: EdgeInsets.all(11), child: Icon3D('lock', size: 22))),
           ),
           const SizedBox(height: 24),
           ElevatedButton(

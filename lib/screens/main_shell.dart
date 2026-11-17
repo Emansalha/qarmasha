@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../widgets/animations.dart';
 import '../widgets/common.dart';
+import '../widgets/icon3d.dart';
 import '../state/app_state.dart';
 import 'home_screen.dart';
 import 'menu_screen.dart';
@@ -52,7 +53,7 @@ class _MainShellState extends State<MainShell> {
       extendBody: true,
       body: Stack(
         children: [
-          IndexedStack(index: _index, children: pages),
+          AnimatedIndexedStack(index: _index, children: pages),
           // شريط السلة العائم
           Positioned(
             right: 16,
@@ -86,11 +87,13 @@ class _MainShellState extends State<MainShell> {
           child: Row(
             children: [
               _NavItem(
+                  image: 'home',
                   icon: Icons.home_rounded,
                   label: 'الرئيسية',
                   selected: _index == 0,
                   onTap: () => select(0)),
               _NavItem(
+                  image: 'menu',
                   icon: Icons.grid_view_rounded,
                   label: 'المنيو',
                   selected: _index == 1,
@@ -122,8 +125,10 @@ class _MainShellState extends State<MainShell> {
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              const Icon(Icons.receipt_long_rounded,
-                                  color: Colors.white),
+                              BounceIn(
+                                active: _index == 2,
+                                child: const Icon3D('orders', size: 30),
+                              ),
                               if (state.orders.isNotEmpty)
                                 Positioned(
                                   top: 10,
@@ -145,11 +150,13 @@ class _MainShellState extends State<MainShell> {
                 ),
               ),
               _NavItem(
+                  image: 'offers',
                   icon: Icons.local_offer_outlined,
                   label: 'العروض',
                   selected: _index == 3,
                   onTap: () => select(3)),
               _NavItem(
+                  image: 'profile',
                   icon: Icons.person_outline_rounded,
                   label: 'حسابي',
                   selected: _index == 4,
@@ -164,12 +171,14 @@ class _MainShellState extends State<MainShell> {
 
 class _NavItem extends StatelessWidget {
   const _NavItem({
+    required this.image,
     required this.icon,
     required this.label,
     required this.selected,
     required this.onTap,
   });
 
+  final String image;
   final IconData icon;
   final String label;
   final bool selected;
@@ -177,22 +186,37 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : AppColors.muted;
     return Expanded(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+      child: Pressable(
+        scale: 0.88,
         onTap: onTap,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color),
-            const SizedBox(height: 4),
-            Text(label,
-                style: TextStyle(
-                    fontSize: 11,
-                    color: color,
-                    fontWeight:
-                        selected ? FontWeight.bold : FontWeight.normal)),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeOutBack,
+              padding: EdgeInsets.all(selected ? 6 : 4),
+              decoration: BoxDecoration(
+                color: selected ? AppColors.cream : Colors.transparent,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: BounceIn(
+                active: selected,
+                child: Icon3D(image, size: 24, grayscale: !selected),
+              ),
+            ),
+            const SizedBox(height: 2),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontFamily: kFont,
+                fontSize: 11,
+                color: selected ? AppColors.primary : AppColors.muted,
+                fontWeight: selected ? FontWeight.w900 : FontWeight.w500,
+              ),
+              child: Text(label),
+            ),
           ],
         ),
       ),

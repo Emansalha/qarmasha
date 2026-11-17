@@ -4,6 +4,7 @@ import '../core/theme.dart';
 import '../data/models.dart';
 import '../state/app_state.dart';
 import '../widgets/animations.dart';
+import '../widgets/icon3d.dart';
 import 'orders_screen.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
@@ -41,8 +42,10 @@ class OrderSuccessScreen extends StatelessWidget {
                       color: Colors.white, size: 80),
                 ),
               ),
-              const SizedBox(height: 24),
-              const Text('تم استلام طلبك! 🎉',
+              const SizedBox(height: 8),
+              const BounceIn(active: true, child: Icon3D('party', size: 56)),
+              const SizedBox(height: 8),
+              const Text('تم استلام طلبك!',
                   style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900)),
               const SizedBox(height: 8),
               Text(

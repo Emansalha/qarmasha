@@ -1,9 +1,16 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/theme.dart';
+
+/// آخر نقطة لمس على الشاشة — تبدأ منها حركة الكشف الدائري للشاشة التالية.
+class TapTracker {
+  TapTracker._();
+  static Offset? last;
+}
 
 /// يصغّر العنصر قليلاً عند الضغط مع اهتزاز خفيف — إحساس احترافي باللمس.
 class Pressable extends StatefulWidget {
@@ -35,7 +42,12 @@ class _PressableState extends State<Pressable> {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: widget.onTap == null ? null : (_) => _set(true),
+      onTapDown: widget.onTap == null
+          ? null
+          : (d) {
+              TapTracker.last = d.globalPosition;
+              _set(true);
+            },
       onTapCancel: () => _set(false),
       onTapUp: (_) => _set(false),
       onTap: widget.onTap == null
@@ -275,4 +287,189 @@ class SmoothRoute<T> extends PageRouteBuilder<T> {
             );
           },
         );
+}
+
+/// انتقال إبداعي: الشاشة الجديدة تنكشف بدائرة تتسع من نقطة اللمس
+/// مع تكبير خفيف للمحتوى.
+class RevealRoute<T> extends PageRouteBuilder<T> {
+  RevealRoute({required WidgetBuilder builder, Offset? center})
+      : super(
+          opaque: false,
+          transitionDuration: const Duration(milliseconds: 620),
+          reverseTransitionDuration: const Duration(milliseconds: 420),
+          pageBuilder: (context, _, __) => builder(context),
+          transitionsBuilder: (context, anim, _, child) {
+            final size = MediaQuery.of(context).size;
+            final origin = center ??
+                TapTracker.last ??
+                Offset(size.width / 2, size.height / 2);
+            final curved = CurvedAnimation(
+              parent: anim,
+              curve: Curves.easeInOutCubic,
+              reverseCurve: Curves.easeInCubic,
+            );
+            return AnimatedBuilder(
+              animation: curved,
+              child: child,
+              builder: (context, child) {
+                final maxR = _farthest(origin, size);
+                return ClipPath(
+                  clipper: _CircleClipper(origin, maxR * curved.value),
+                  child: Transform.scale(
+                    scale: 0.92 + 0.08 * curved.value,
+                    alignment: Alignment(
+                      (origin.dx / size.width) * 2 - 1,
+                      (origin.dy / size.height) * 2 - 1,
+                    ),
+                    child: child,
+                  ),
+                );
+              },
+            );
+          },
+        );
+
+  static double _farthest(Offset o, Size s) {
+    final corners = [
+      Offset.zero,
+      Offset(s.width, 0),
+      Offset(0, s.height),
+      Offset(s.width, s.height),
+    ];
+    return corners.map((c) => (c - o).distance).reduce(math.max) + 8;
+  }
+}
+
+class _CircleClipper extends CustomClipper<Path> {
+  _CircleClipper(this.center, this.radius);
+  final Offset center;
+  final double radius;
+
+  @override
+  Path getClip(Size size) =>
+      Path()..addOval(Rect.fromCircle(center: center, radius: radius));
+
+  @override
+  bool shouldReclip(_CircleClipper old) =>
+      old.radius != radius || old.center != center;
+}
+
+/// مُبدّل تبويبات: الصفحة الجديدة تظهر بتكبير وتلاشٍ وانزلاق خفيف
+/// مع إبقاء حالة كل صفحة (مثل IndexedStack).
+class AnimatedIndexedStack extends StatefulWidget {
+  const AnimatedIndexedStack(
+      {super.key, required this.index, required this.children});
+  final int index;
+  final List<Widget> children;
+
+  @override
+  State<AnimatedIndexedStack> createState() => _AnimatedIndexedStackState();
+}
+
+class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 480))
+    ..value = 1;
+  late int _current = widget.index;
+  int _previous = -1;
+  bool _forward = true;
+
+  @override
+  void didUpdateWidget(AnimatedIndexedStack old) {
+    super.didUpdateWidget(old);
+    if (old.index != widget.index) {
+      _forward = widget.index > old.index;
+      _previous = old.index;
+      _current = widget.index;
+      _c.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (context, _) {
+        final t = Curves.easeOutCubic.transform(_c.value);
+        final animating = _c.isAnimating;
+        return Stack(
+          children: [
+            for (var i = 0; i < widget.children.length; i++)
+              _buildChild(i, t, animating),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildChild(int i, double t, bool animating) {
+    final isCurrent = i == _current;
+    final isPrevious = animating && i == _previous;
+    final visible = isCurrent || isPrevious;
+    double opacity = 0;
+    double scale = 1;
+    double dx = 0;
+    // الاتجاه في RTL: التبويب التالي يأتي من اليسار
+    final dir = _forward ? -1.0 : 1.0;
+    if (isCurrent) {
+      opacity = t;
+      scale = 0.94 + 0.06 * t;
+      dx = dir * 40 * (1 - t);
+    } else if (isPrevious) {
+      opacity = 1 - t;
+      scale = 1 - 0.04 * t;
+      dx = -dir * 30 * t;
+    }
+    return Positioned.fill(
+      child: Offstage(
+        offstage: !visible,
+        child: TickerMode(
+          enabled: visible,
+          child: IgnorePointer(
+            ignoring: !isCurrent,
+            child: Opacity(
+              opacity: opacity.clamp(0.0, 1.0),
+              child: Transform.translate(
+                offset: Offset(dx, 0),
+                child: Transform.scale(scale: scale, child: widget.children[i]),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// أيقونة تقفز وتدور قليلاً عند تفعيلها.
+class BounceIn extends StatelessWidget {
+  const BounceIn({super.key, required this.active, required this.child});
+  final bool active;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(active),
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: active ? 650 : 250),
+      curve: active ? Curves.elasticOut : Curves.easeOut,
+      builder: (context, v, child) {
+        final s = active ? 0.7 + 0.45 * v : 1.0;
+        final r = active ? (1 - v) * 0.5 : 0.0;
+        return Transform.rotate(
+          angle: r,
+          child: Transform.scale(scale: s, child: child),
+        );
+      },
+      child: child,
+    );
+  }
 }

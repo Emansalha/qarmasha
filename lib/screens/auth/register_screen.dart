@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme.dart';
 import '../../data/api_service.dart';
 import '../../state/app_state.dart';
+import '../../widgets/icon3d.dart';
 
 /// إنشاء حساب عميل (POST /places/{slug}/auth/register).
 /// تُرجع true عند النجاح.
@@ -62,7 +63,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _field({
     required String label,
     required TextEditingController controller,
-    required IconData icon,
+    required String icon,
     String? hint,
     TextInputType? type,
     bool obscure = false,
@@ -84,7 +85,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             obscureText: obscure,
             textDirection: ltr ? TextDirection.ltr : null,
             decoration:
-                InputDecoration(hintText: hint, prefixIcon: Icon(icon)),
+                InputDecoration(
+                hintText: hint,
+                prefixIcon: Padding(
+                    padding: const EdgeInsets.all(11),
+                    child: Icon3D(icon, size: 22))),
             validator: validator,
           ),
         ],
@@ -114,7 +119,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 _field(
                   label: 'الاسم الكامل',
                   controller: _name,
-                  icon: Icons.person_outline,
+                  icon: 'user',
                   hint: 'مثال: ليان خالد',
                   validator: (v) => (v == null || v.trim().length < 2)
                       ? 'أدخل اسمك'
@@ -123,7 +128,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 _field(
                   label: 'رقم الهاتف',
                   controller: _phone,
-                  icon: Icons.phone_outlined,
+                  icon: 'phone',
                   hint: '0599 123 456',
                   type: TextInputType.phone,
                   ltr: true,
@@ -135,7 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 _field(
                   label: 'البريد الإلكتروني',
                   controller: _email,
-                  icon: Icons.mail_outline,
+                  icon: 'mail',
                   hint: 'name@example.com',
                   type: TextInputType.emailAddress,
                   ltr: true,
@@ -146,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 _field(
                   label: 'كلمة المرور',
                   controller: _password,
-                  icon: Icons.lock_outline,
+                  icon: 'lock',
                   hint: '8 أحرف على الأقل (حروف وأرقام)',
                   obscure: true,
                   validator: (v) => (v == null || v.length < 8)

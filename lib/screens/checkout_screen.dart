@@ -6,6 +6,7 @@ import '../data/api_service.dart';
 import '../data/models.dart';
 import '../state/app_state.dart';
 import '../widgets/animations.dart';
+import '../widgets/icon3d.dart';
 import '../widgets/table_picker.dart';
 import 'auth/login_screen.dart';
 import 'order_success_screen.dart';
@@ -138,7 +139,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               children: [
                 Expanded(
                   child: _TypeCard(
-                    icon: Icons.table_restaurant_rounded,
+                    icon: 'dinein',
                     title: 'داخل المطعم',
                     subtitle: 'برقم الطاولة',
                     selected: _type == OrderType.dineIn,
@@ -151,7 +152,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _TypeCard(
-                    icon: Icons.delivery_dining_rounded,
+                    icon: 'delivery',
                     title: 'توصيل',
                     subtitle: 'لباب البيت',
                     selected: _type == OrderType.delivery,
@@ -175,7 +176,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             TextFormField(
               controller: _name,
               decoration: const InputDecoration(
-                  hintText: 'الاسم', prefixIcon: Icon(Icons.person_outline)),
+                  hintText: 'الاسم', prefixIcon: const Padding(padding: EdgeInsets.all(11), child: Icon3D('user', size: 22))),
               validator: (v) =>
                   (v == null || v.trim().length < 2) ? 'أدخل اسمك' : null,
             ),
@@ -186,7 +187,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               textDirection: TextDirection.ltr,
               decoration: const InputDecoration(
                   hintText: 'رقم الهاتف',
-                  prefixIcon: Icon(Icons.phone_outlined)),
+                  prefixIcon: const Padding(padding: EdgeInsets.all(11), child: Icon3D('phone', size: 22))),
               validator: (v) => (v == null ||
                       !RegExp(r'^\+?[0-9\s-]{7,20}$').hasMatch(v.trim()))
                   ? 'رقم غير صحيح'
@@ -198,12 +199,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               maxLines: 2,
               decoration: const InputDecoration(
                   hintText: 'ملاحظات إضافية (اختياري)',
-                  prefixIcon: Icon(Icons.edit_note)),
+                  prefixIcon: const Padding(padding: EdgeInsets.all(11), child: Icon3D('note', size: 22))),
             ),
 
             const _Title('طريقة الدفع'),
             _PayOption(
-              icon: Icons.payments_outlined,
+              icon: 'cash',
               title: _type == OrderType.dineIn
                   ? 'نقداً عند الطاولة'
                   : 'نقداً عند الاستلام',
@@ -212,7 +213,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             const SizedBox(height: 10),
             _PayOption(
-              icon: Icons.credit_card,
+              icon: 'card',
               title: 'بطاقة (تجريبي)',
               selected: _payment == 'card_demo',
               onTap: () => setState(() => _payment = 'card_demo'),
@@ -323,7 +324,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           controller: _city,
           decoration: const InputDecoration(
               hintText: 'المدينة / الحي',
-              prefixIcon: Icon(Icons.location_city_outlined)),
+              prefixIcon: const Padding(padding: EdgeInsets.all(11), child: Icon3D('pin', size: 22))),
           validator: req,
         ),
         const SizedBox(height: 12),
@@ -331,7 +332,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           controller: _street,
           decoration: const InputDecoration(
               hintText: 'الشارع وأقرب معلم',
-              prefixIcon: Icon(Icons.signpost_outlined)),
+              prefixIcon: const Padding(padding: EdgeInsets.all(11), child: Icon3D('pin', size: 22))),
           validator: req,
         ),
         const SizedBox(height: 12),
@@ -339,7 +340,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           controller: _building,
           decoration: const InputDecoration(
               hintText: 'العمارة / الطابق / الشقة (اختياري)',
-              prefixIcon: Icon(Icons.apartment_outlined)),
+              prefixIcon: const Padding(padding: EdgeInsets.all(11), child: Icon3D('home', size: 22))),
         ),
         const SizedBox(height: 8),
         Text(
@@ -390,7 +391,7 @@ class _TypeCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final String icon;
   final String title;
   final String subtitle;
   final bool selected;
@@ -412,8 +413,7 @@ class _TypeCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon,
-                size: 34, color: selected ? Colors.white : AppColors.primary),
+            BounceIn(active: selected, child: Icon3D(icon, size: 44)),
             const SizedBox(height: 8),
             Text(title,
                 style: TextStyle(
@@ -439,7 +439,7 @@ class _PayOption extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final String icon;
   final String title;
   final bool selected;
   final VoidCallback onTap;
@@ -459,7 +459,7 @@ class _PayOption extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.primary),
+            IconTile(icon, size: 40),
             const SizedBox(width: 12),
             Expanded(
                 child: Text(title,

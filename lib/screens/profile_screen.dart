@@ -4,6 +4,8 @@ import '../core/config.dart';
 import '../core/theme.dart';
 import '../state/app_state.dart';
 import '../widgets/common.dart';
+import '../widgets/animations.dart';
+import '../widgets/icon3d.dart';
 import 'auth/login_screen.dart';
 import 'owner/owner_login_screen.dart';
 import 'splash_screen.dart';
@@ -85,23 +87,30 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 18),
           Row(
             children: [
-              _Stat(value: '${state.orders.length}', label: 'طلب'),
+              _Stat(icon: 'orders', value: '${state.orders.length}', label: 'طلب'),
               const SizedBox(width: 12),
-              _Stat(value: '${favs.length}', label: 'مفضّلة'),
+              _Stat(icon: 'heart', value: '${favs.length}', label: 'مفضّلة'),
               const SizedBox(width: 12),
-              _Stat(value: '${state.cartCount}', label: 'في السلة'),
+              _Stat(icon: 'cart', value: '${state.cartCount}', label: 'في السلة'),
             ],
           ),
           if (favs.isNotEmpty) ...[
             const SizedBox(height: 22),
-            const Text('المفضّلة ❤️',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+            const Row(
+              children: [
+                Icon3D('heart', size: 24),
+                SizedBox(width: 6),
+                Text('المفضّلة',
+                    style:
+                        TextStyle(fontSize: 17, fontWeight: FontWeight.w900)),
+              ],
+            ),
             const SizedBox(height: 12),
             for (final f in favs) FoodTile(item: f),
           ],
           const SizedBox(height: 14),
           _Tile(
-            icon: Icons.storefront_outlined,
+            icon: 'store',
             title: 'لوحة صاحب المطعم',
             subtitle: 'إضافة أصناف بالصور عبر Dori API',
             onTap: () => Navigator.push(
@@ -110,7 +119,7 @@ class ProfileScreen extends StatelessWidget {
                     builder: (_) => const OwnerLoginScreen())),
           ),
           _Tile(
-            icon: Icons.sync,
+            icon: 'refresh',
             title: 'تحديث المنيو',
             subtitle: state.usingDemoMenu
                 ? 'المنيو الحالي تجريبي (${AppConfig.placeSlug})'
@@ -118,7 +127,7 @@ class ProfileScreen extends StatelessWidget {
             onTap: state.loadMenu,
           ),
           _Tile(
-            icon: Icons.info_outline,
+            icon: 'info',
             title: 'عن التطبيق',
             subtitle: '${AppConfig.appName} — ${AppConfig.tagline}',
             onTap: () => showAboutDialog(
@@ -132,7 +141,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           if (user != null)
             _Tile(
-              icon: Icons.logout,
+              icon: 'door',
               title: 'تسجيل الخروج',
               color: AppColors.primary,
               onTap: () async {
@@ -152,7 +161,8 @@ class ProfileScreen extends StatelessWidget {
 }
 
 class _Stat extends StatelessWidget {
-  const _Stat({required this.value, required this.label});
+  const _Stat({required this.icon, required this.value, required this.label});
+  final String icon;
   final String value;
   final String label;
 
@@ -167,6 +177,8 @@ class _Stat extends StatelessWidget {
           ),
           child: Column(
             children: [
+              BounceIn(active: true, child: Icon3D(icon, size: 30)),
+              const SizedBox(height: 4),
               Text(value,
                   style: const TextStyle(
                       fontSize: 20,
@@ -188,7 +200,7 @@ class _Tile extends StatelessWidget {
     this.color = AppColors.text,
   });
 
-  final IconData icon;
+  final String icon;
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
@@ -204,10 +216,7 @@ class _Tile extends StatelessWidget {
         ),
         child: ListTile(
           onTap: onTap,
-          leading: CircleAvatar(
-            backgroundColor: const Color(0xFFFFEDE6),
-            child: Icon(icon, color: AppColors.primary),
-          ),
+          leading: IconTile(icon, size: 44),
           title: Text(title,
               style: TextStyle(fontWeight: FontWeight.bold, color: color)),
           subtitle: subtitle == null

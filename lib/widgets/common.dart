@@ -7,6 +7,7 @@ import '../screens/cart_screen.dart';
 import '../screens/item_details_screen.dart';
 import '../state/app_state.dart';
 import 'animations.dart';
+import 'icon3d.dart';
 
 /// صورة (من assets أو الإنترنت) مع حالة تحميل وخطأ لطيفة.
 class NetImage extends StatelessWidget {
@@ -77,8 +78,11 @@ class CircleIconButton extends StatelessWidget {
     this.size = 46,
     this.color = AppColors.text,
     this.background = Colors.white,
+    this.image,
   });
 
+  /// اسم أيقونة 3D (من assets/icons) تُعرض بدل [icon].
+  final String? image;
   final IconData icon;
   final VoidCallback onTap;
   final int badge;
@@ -101,7 +105,10 @@ class CircleIconButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(size * 0.36),
               boxShadow: softShadow(),
             ),
-            child: Icon(icon, color: color, size: 22),
+            alignment: Alignment.center,
+            child: image != null
+                ? Icon3D(image!, size: size * 0.56)
+                : Icon(icon, color: color, size: 22),
           ),
           if (badge > 0)
             Positioned(
@@ -142,6 +149,7 @@ class CartButton extends StatelessWidget {
       trigger: state.cartPulse,
       child: CircleIconButton(
         icon: Icons.shopping_bag_outlined,
+        image: 'cart',
         badge: state.cartCount,
         onTap: () => openCart(context),
       ),
@@ -150,7 +158,7 @@ class CartButton extends StatelessWidget {
 }
 
 void openCart(BuildContext context) => Navigator.push(
-    context, SmoothRoute<void>(builder: (_) => const CartScreen()));
+    context, RevealRoute<void>(builder: (_) => const CartScreen()));
 
 /// شارة صغيرة ملونة (الأكثر مبيعاً، وفّر 15%...).
 class Tag extends StatelessWidget {
@@ -262,10 +270,12 @@ class QtyStepper extends StatelessWidget {
 /// عنوان قسم مع "عرض الكل".
 class SectionHeader extends StatelessWidget {
   const SectionHeader(this.title,
-      {super.key, this.subtitle, this.onSeeAll, this.emoji});
+      {super.key, this.subtitle, this.onSeeAll, this.icon});
   final String title;
   final String? subtitle;
-  final String? emoji;
+
+  /// اسم أيقونة 3D بجانب العنوان.
+  final String? icon;
   final VoidCallback? onSeeAll;
 
   @override
@@ -279,11 +289,21 @@ class SectionHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${emoji == null ? '' : '$emoji '}$title',
-                    style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.text)),
+                Row(
+                  children: [
+                    if (icon != null) ...[
+                      Icon3D(icon!, size: 26),
+                      const SizedBox(width: 6),
+                    ],
+                    Flexible(
+                      child: Text(title,
+                          style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.text)),
+                    ),
+                  ],
+                ),
                 if (subtitle != null)
                   Text(subtitle!,
                       style: const TextStyle(
@@ -324,7 +344,7 @@ class SectionHeader extends StatelessWidget {
 void openItem(BuildContext context, MenuItem item) {
   Navigator.push(
     context,
-    SmoothRoute<void>(builder: (_) => ItemDetailsScreen(item: item)),
+    RevealRoute<void>(builder: (_) => ItemDetailsScreen(item: item)),
   );
 }
 
@@ -433,14 +453,12 @@ class FoodCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.star_rounded,
-                              color: AppColors.accent, size: 16),
+                          const Icon3D('star', size: 15),
                           Text(' ${item.rating.toStringAsFixed(1)}',
                               style: const TextStyle(
                                   fontSize: 12, fontWeight: FontWeight.w700)),
                           const SizedBox(width: 8),
-                          const Icon(Icons.timer_outlined,
-                              color: AppColors.muted, size: 14),
+                          const Icon3D('stopwatch', size: 14),
                           Text(' ${item.prepMinutes}د',
                               style: const TextStyle(
                                   fontSize: 12, color: AppColors.muted)),
@@ -513,12 +531,12 @@ class FoodCard extends StatelessWidget {
                   duration: const Duration(milliseconds: 250),
                   transitionBuilder: (c, a) =>
                       ScaleTransition(scale: a, child: c),
-                  child: Icon(
-                    fav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                    key: ValueKey(fav),
-                    size: 22,
-                    color: AppColors.primary,
-                  ),
+                  child: fav
+                      ? const Icon3D('heart', size: 24, key: ValueKey(true))
+                      : const Icon(Icons.favorite_border_rounded,
+                          key: ValueKey(false),
+                          size: 22,
+                          color: AppColors.primary),
                 ),
               ),
             ),
@@ -591,14 +609,12 @@ class FoodTile extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(Icons.star_rounded,
-                          color: AppColors.accent, size: 15),
+                      const Icon3D('star', size: 14),
                       Text(' ${item.rating.toStringAsFixed(1)}',
                           style: const TextStyle(
                               fontSize: 11, fontWeight: FontWeight.w700)),
                       const SizedBox(width: 8),
-                      const Icon(Icons.local_fire_department_rounded,
-                          color: AppColors.primary, size: 14),
+                      const Icon3D('fire', size: 14),
                       Text(' ${item.ordersCount}+',
                           style: const TextStyle(
                               fontSize: 11, color: AppColors.muted)),
@@ -701,7 +717,23 @@ class CategoryBubble extends StatelessWidget {
               ),
               child: ClipOval(
                 child: imageUrl != null && imageUrl!.isNotEmpty
-                    ? NetImage(imageUrl!)
+                    ? Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          NetImage(imageUrl!),
+                          Align(
+                            alignment: const Alignment(0.62, 0.62),
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon3D(categoryIcon(label), size: 18),
+                            ),
+                          ),
+                        ],
+                      )
                     : Container(
                         color: AppColors.cream,
                         alignment: Alignment.center,
@@ -760,7 +792,16 @@ class EmptyState extends StatelessWidget {
               border: Border.all(color: Colors.white, width: 6),
               boxShadow: softShadow(),
             ),
-            child: ClipOval(child: NetImage(image)),
+            child: image.startsWith('icon:')
+                ? Container(
+                    decoration: const BoxDecoration(
+                      color: AppColors.cream,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon3D(image.substring(5), size: 90),
+                  )
+                : ClipOval(child: NetImage(image)),
           ),
           const SizedBox(height: 20),
           Text(title,

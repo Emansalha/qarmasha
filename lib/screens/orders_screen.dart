@@ -8,6 +8,7 @@ import '../data/models.dart';
 import '../state/app_state.dart';
 import '../widgets/animations.dart';
 import '../widgets/common.dart';
+import '../widgets/icon3d.dart';
 
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
@@ -27,23 +28,14 @@ class OrdersScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
             const SizedBox(height: 16),
             if (state.orders.isEmpty)
-              const Padding(
-                padding: EdgeInsets.only(top: 100),
-                child: Column(
-                  children: [
-                    Text('🧾', style: TextStyle(fontSize: 60)),
-                    SizedBox(height: 10),
-                    Text('لا توجد طلبات بعد',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 4),
-                    Text('اطلب وجبتك الأولى وتابعها من هنا',
-                        style: TextStyle(color: AppColors.muted)),
-                  ],
-                ),
+              const EmptyState(
+                image: 'icon:orders',
+                title: 'لا توجد طلبات بعد',
+                subtitle: 'اطلب وجبتك الأولى وتابعها من هنا خطوة بخطوة',
               )
             else
-              for (final o in state.orders) _OrderCard(order: o),
+              for (var k = 0; k < state.orders.length; k++)
+              FadeSlideIn(index: k, child: _OrderCard(order: state.orders[k])),
           ],
         ),
       ),
@@ -99,13 +91,9 @@ class _OrderCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(
-                        order.type == OrderType.dineIn
-                            ? Icons.table_restaurant_rounded
-                            : Icons.delivery_dining_rounded,
-                        size: 16,
-                        color: AppColors.muted,
-                      ),
+                      Icon3D(
+                          order.type == OrderType.dineIn ? 'table' : 'delivery',
+                          size: 18),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(order.destination,
@@ -171,14 +159,7 @@ class OrderDetailsScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
-                      backgroundColor: const Color(0xFFFFEDE6),
-                      child: Icon(
-                          dineIn
-                              ? Icons.table_restaurant_rounded
-                              : Icons.delivery_dining_rounded,
-                          color: AppColors.primary),
-                    ),
+                    IconTile(dineIn ? 'dinein' : 'delivery', size: 48),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

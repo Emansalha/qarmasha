@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../state/app_state.dart';
 import '../widgets/common.dart';
+import '../widgets/icon3d.dart';
 
 class OffersScreen extends StatelessWidget {
   const OffersScreen({super.key});
@@ -17,8 +18,14 @@ class OffersScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 170),
         children: [
-          const Text('العروض',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+          const Row(
+            children: [
+              Icon3D('offers', size: 34),
+              SizedBox(width: 8),
+              Text('العروض',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+            ],
+          ),
           const SizedBox(height: 4),
           const Text('وفّر أكثر على وجباتك المفضّلة 🔥',
               style: TextStyle(color: AppColors.muted)),

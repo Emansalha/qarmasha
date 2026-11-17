@@ -6,6 +6,7 @@ import '../data/models.dart';
 import '../state/app_state.dart';
 import '../widgets/animations.dart';
 import '../widgets/common.dart';
+import '../widgets/icon3d.dart';
 
 class ItemDetailsScreen extends StatefulWidget {
   const ItemDetailsScreen({super.key, required this.item});
@@ -186,17 +187,14 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                         child: Row(
                           children: [
                             _Info(
-                                icon: Icons.star_rounded,
-                                color: AppColors.accent,
+                                icon: 'star',
                                 text: item.rating.toStringAsFixed(1)),
                             _Info(
-                                icon: Icons.timer_outlined,
-                                color: AppColors.primary,
+                                icon: 'stopwatch',
                                 text: '${item.prepMinutes} دقيقة'),
                             if (item.ordersCount > 0)
                               _Info(
-                                  icon: Icons.local_fire_department_rounded,
-                                  color: AppColors.primary,
+                                  icon: 'fire',
                                   text: '${item.ordersCount}+ طلب'),
                           ],
                         ),
@@ -217,7 +215,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
 
                       // ===== الحجم =====
                       if (_sizes.isNotEmpty) ...[
-                        const _Title('اختر الحجم'),
+                        const _Title('اختر الحجم', icon: 'burger'),
                         FadeSlideIn(
                           index: 3,
                           child: Row(
@@ -244,7 +242,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
 
                       // ===== درجة الحرارة =====
                       if (_hasSpice) ...[
-                        const _Title('درجة الحرارة 🌶️'),
+                        const _Title('درجة الحرارة', icon: 'pepper'),
                         FadeSlideIn(
                           index: 4,
                           child: Container(
@@ -300,7 +298,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
 
                       // ===== الإضافات =====
                       if (_extraOptions.isNotEmpty) ...[
-                        const _Title('أضف لمستك'),
+                        const _Title('أضف لمستك', icon: 'sparkles'),
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
@@ -327,13 +325,13 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                         ),
                       ],
 
-                      const _Title('ملاحظات للمطبخ'),
+                      const _Title('ملاحظات للمطبخ', icon: 'note'),
                       TextField(
                         controller: _note,
                         maxLines: 2,
                         decoration: const InputDecoration(
                           hintText: 'مثال: بدون مخلل، صوص زيادة...',
-                          prefixIcon: Icon(Icons.edit_note_rounded),
+                          prefixIcon: const Padding(padding: EdgeInsets.all(11), child: Icon3D('note', size: 22)),
                         ),
                       ),
                     ],
@@ -421,8 +419,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.shopping_bag_rounded,
-                            color: Colors.white, size: 20),
+                        const Icon3D('cart', size: 22),
                         const SizedBox(width: 8),
                         const Text('أضف للسلة',
                             style: TextStyle(
@@ -457,21 +454,30 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
 }
 
 class _Title extends StatelessWidget {
-  const _Title(this.text);
+  const _Title(this.text, {this.icon});
   final String text;
+  final String? icon;
 
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(top: 24, bottom: 12),
-        child: Text(text,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900)),
+        child: Row(
+          children: [
+            if (icon != null) ...[
+              Icon3D(icon!, size: 26),
+              const SizedBox(width: 8),
+            ],
+            Text(text,
+                style:
+                    const TextStyle(fontSize: 17, fontWeight: FontWeight.w900)),
+          ],
+        ),
       );
 }
 
 class _Info extends StatelessWidget {
-  const _Info({required this.icon, required this.color, required this.text});
-  final IconData icon;
-  final Color color;
+  const _Info({required this.icon, required this.text});
+  final String icon;
   final String text;
 
   @override
@@ -487,8 +493,8 @@ class _Info extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 4),
+          Icon3D(icon, size: 18),
+          const SizedBox(width: 5),
           Text(text,
               style:
                   const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
@@ -527,11 +533,15 @@ class _SizeCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(Icons.lunch_dining_rounded,
-                size: option.id == 'regular'
-                    ? 22
-                    : (option.id == 'large' ? 28 : 34),
-                color: selected ? Colors.white : AppColors.primary),
+            AnimatedScale(
+              scale: selected ? 1.12 : 1,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutBack,
+              child: Icon3D('burger',
+                  size: option.id == 'regular'
+                      ? 24
+                      : (option.id == 'large' ? 30 : 36)),
+            ),
             const SizedBox(height: 4),
             Text(option.label,
                 style: TextStyle(
@@ -579,6 +589,10 @@ class _ExtraChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (option.icon != null) ...[
+              Icon3D(option.icon!, size: 22),
+              const SizedBox(width: 4),
+            ],
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),

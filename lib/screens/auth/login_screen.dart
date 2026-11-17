@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme.dart';
 import '../../data/api_service.dart';
 import '../../state/app_state.dart';
+import '../../widgets/icon3d.dart';
 import '../main_shell.dart';
 import '../splash_screen.dart';
 import 'register_screen.dart';
@@ -112,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   textDirection: TextDirection.ltr,
                   decoration: const InputDecoration(
                     hintText: 'name@example.com',
-                    prefixIcon: Icon(Icons.mail_outline),
+                    prefixIcon: const Padding(padding: EdgeInsets.all(11), child: Icon3D('mail', size: 22)),
                   ),
                   validator: (v) => (v == null || !v.contains('@'))
                       ? 'أدخل بريداً صحيحاً'
@@ -125,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   obscureText: _obscure,
                   decoration: InputDecoration(
                     hintText: '••••••••',
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: const Padding(padding: EdgeInsets.all(11), child: Icon3D('lock', size: 22)),
                     suffixIcon: IconButton(
                       icon: Icon(_obscure
                           ? Icons.visibility_off_outlined
