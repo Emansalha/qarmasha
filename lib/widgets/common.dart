@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../core/theme.dart';
 import '../data/models.dart';
+import '../data/demo_menu.dart';
 import '../screens/cart_screen.dart';
 import '../screens/item_details_screen.dart';
 import '../state/app_state.dart';
@@ -697,17 +698,22 @@ class CategoryBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // دائماً صورة حقيقية: صورة التصنيف أو صورة مناسبة لاسمه
+    final photo = (imageUrl != null && imageUrl!.isNotEmpty)
+        ? imageUrl!
+        : (label == 'الكل' ? img('family_box') : categoryPhoto(label));
+    final icon = label == 'الكل' ? 'dinein' : categoryIcon(label);
     return Pressable(
       onTap: onTap,
       child: SizedBox(
-        width: 80,
+        width: 84,
         child: Column(
           children: [
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeOutBack,
-              width: selected ? 70 : 64,
-              height: selected ? 70 : 64,
+              width: selected ? 74 : 68,
+              height: selected ? 74 : 68,
               padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
@@ -716,30 +722,23 @@ class CategoryBubble extends StatelessWidget {
                 boxShadow: selected ? glowShadow() : softShadow(),
               ),
               child: ClipOval(
-                child: imageUrl != null && imageUrl!.isNotEmpty
-                    ? Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          NetImage(imageUrl!),
-                          Align(
-                            alignment: const Alignment(0.62, 0.62),
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon3D(categoryIcon(label), size: 18),
-                            ),
-                          ),
-                        ],
-                      )
-                    : Container(
-                        color: AppColors.cream,
-                        alignment: Alignment.center,
-                        child: Text(emoji ?? '🍽️',
-                            style: const TextStyle(fontSize: 28)),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    NetImage(photo),
+                    Align(
+                      alignment: const Alignment(0.62, 0.62),
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon3D(icon, size: 18),
                       ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 8),

@@ -196,7 +196,7 @@ class HomeScreen extends StatelessWidget {
             SectionHeader('التصنيفات',
                 icon: 'menu', onSeeAll: () => onOpenMenu(null)),
             SizedBox(
-              height: 104,
+              height: 112,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
