@@ -136,7 +136,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
           children: [
             const _H('صور الصنف'),
-            const Text('اختر من صور احترافية جاهزة أو الصق رابط صورة',
+            const Text('اختر من صور حقيقية جاهزة داخل التطبيق أو الصق رابط صورة',
                 style: TextStyle(color: AppColors.muted, fontSize: 12)),
             const SizedBox(height: 10),
             SizedBox(
@@ -147,9 +147,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 separatorBuilder: (_, __) => const SizedBox(width: 10),
                 itemBuilder: (_, i) {
                   final e = gallery[i];
-                  final url = pexels(int.parse(
-                      RegExp(r'photos/(\d+)/').firstMatch(e.value)!.group(1)!),
-                      w: 1200);
+                  final url = e.value;
                   final selected = _images.contains(url);
                   return GestureDetector(
                     onTap: () => _toggleImage(url),

@@ -28,7 +28,16 @@ class NetImage extends StatelessWidget {
         );
     final img = url.isEmpty
         ? placeholder(Icons.fastfood_rounded)
-        : Image.network(
+        : url.startsWith('assets/')
+            ? Image.asset(
+                url,
+                fit: fit,
+                height: height,
+                width: width,
+                errorBuilder: (context, error, stack) =>
+                    placeholder(Icons.fastfood_rounded),
+              )
+            : Image.network(
             url,
             fit: fit,
             height: height,

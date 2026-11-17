@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 
 import '../core/config.dart';
@@ -392,8 +393,12 @@ class ApiService {
     return _list(data).map(MenuItem.fromJson).toList();
   }
 
-  /// تحميل صورة من رابط (مثلاً من Pexels) لرفعها إلى دوري.
+  /// تحميل صورة (من assets داخل التطبيق أو من رابط) لرفعها إلى دوري.
   Future<Uint8List> downloadImage(String url) async {
+    if (url.startsWith('assets/')) {
+      final data = await rootBundle.load(url);
+      return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    }
     final res =
         await _client.get(Uri.parse(url)).timeout(const Duration(seconds: 40));
     if (res.statusCode != 200) {

@@ -8,6 +8,7 @@ import '../data/demo_menu.dart';
 import '../data/models.dart';
 import '../state/app_state.dart';
 import '../widgets/common.dart';
+import '../widgets/flame_logo.dart';
 import 'search_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -47,7 +48,15 @@ class HomeScreen extends StatelessWidget {
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            const Text('🔥 ', style: TextStyle(fontSize: 22)),
+                            SizedBox(
+                              width: 26,
+                              height: 26,
+                              child: CustomPaint(
+                                painter: FlamePainter(
+                                    outerColor: AppColors.primary),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
                             Text(AppConfig.appName,
                                 style: const TextStyle(
                                     fontSize: 28,
@@ -277,19 +286,28 @@ class _BannerCarousel extends StatefulWidget {
   State<_BannerCarousel> createState() => _BannerCarouselState();
 }
 
+/// بطاقات إعلانات تنقلب بحركة ثلاثية الأبعاد (3D flip) وتدور تلقائياً بلا نهاية.
 class _BannerCarouselState extends State<_BannerCarousel> {
-  final _controller = PageController(viewportFraction: 0.9);
+  static const _loopBase = 1000;
+  late final PageController _controller =
+      PageController(viewportFraction: 0.86, initialPage: _loopBase * 3);
   int _page = 0;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!_controller.hasClients || widget.banners.length < 2) return;
-      final next = (_page + 1) % widget.banners.length;
-      _controller.animateToPage(next,
-          duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
+    _startAutoPlay();
+  }
+
+  void _startAutoPlay() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!_controller.hasClients) return;
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 900),
+        curve: Curves.easeInOutCubic,
+      );
     });
   }
 
@@ -304,104 +322,64 @@ class _BannerCarouselState extends State<_BannerCarousel> {
   Widget build(BuildContext context) {
     final banners =
         widget.banners.isEmpty ? DemoMenu.banners : widget.banners;
+    final count = banners.length;
     return Column(
       children: [
         SizedBox(
-          height: 200,
-          child: PageView.builder(
-            controller: _controller,
-            itemCount: banners.length,
-            onPageChanged: (p) => setState(() => _page = p),
-            itemBuilder: (_, i) {
-              final b = banners[i];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(26),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      NetImage(b.imageUrl),
-                      const DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.centerRight,
-                            end: Alignment.centerLeft,
-                            colors: [Color(0xF27A0F0F), Color(0x00000000)],
-                            stops: [0.35, 0.95],
-                          ),
-                        ),
+          height: 205,
+          child: Listener(
+            // إيقاف التشغيل التلقائي أثناء السحب ثم استئنافه
+            onPointerDown: (_) => _timer?.cancel(),
+            onPointerUp: (_) => _startAutoPlay(),
+            child: PageView.builder(
+              controller: _controller,
+              onPageChanged: (p) => setState(() => _page = p % count),
+              itemBuilder: (_, i) {
+                final b = banners[i % count];
+                return AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    double delta = 0;
+                    if (_controller.hasClients &&
+                        _controller.position.haveDimensions) {
+                      delta = (_controller.page ?? i.toDouble()) - i;
+                    } else {
+                      delta = (_loopBase * 3 - i).toDouble();
+                    }
+                    delta = delta.clamp(-1.0, 1.0);
+                    // دوران حول المحور الرأسي + تصغير بسيط = قلب البطاقة
+                    final angle = delta * 1.15;
+                    final scale = 1 - delta.abs() * 0.12;
+                    final m = Matrix4.identity()
+                      ..setEntry(3, 2, 0.0013)
+                      ..rotateY(angle);
+                    m.multiply(Matrix4.diagonal3Values(scale, scale, 1));
+                    return Opacity(
+                      opacity: (1 - delta.abs() * 0.45).clamp(0.0, 1.0),
+                      child: Transform(
+                        alignment: delta > 0
+                            ? Alignment.centerLeft
+                            : Alignment.centerRight,
+                        transform: m,
+                        child: child,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(b.tag,
-                                style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 4),
-                            Text(b.title,
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    height: 1.15,
-                                    fontWeight: FontWeight.w900)),
-                            const SizedBox(height: 6),
-                            Text(b.subtitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 12)),
-                            const SizedBox(height: 10),
-                            GestureDetector(
-                              onTap: widget.onOrder,
-                              child: Container(
-                                padding: const EdgeInsets.fromLTRB(8, 7, 16, 7),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary,
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text('اطلب الآن',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold)),
-                                    SizedBox(width: 8),
-                                    CircleAvatar(
-                                      radius: 11,
-                                      backgroundColor: Colors.white,
-                                      child: Icon(Icons.arrow_back,
-                                          size: 14, color: AppColors.primary),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                    );
+                  },
+                  child: _BannerCard(banner: b, onOrder: widget.onOrder),
+                );
+              },
+            ),
           ),
         ),
         const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            for (var i = 0; i < banners.length; i++)
+            for (var i = 0; i < count; i++)
               AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
+                duration: const Duration(milliseconds: 300),
                 margin: const EdgeInsets.symmetric(horizontal: 3),
-                width: i == _page ? 20 : 7,
+                width: i == _page ? 22 : 7,
                 height: 7,
                 decoration: BoxDecoration(
                   color: i == _page ? AppColors.primary : AppColors.border,
@@ -411,6 +389,112 @@ class _BannerCarouselState extends State<_BannerCarousel> {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _BannerCard extends StatelessWidget {
+  const _BannerCard({required this.banner, required this.onOrder});
+  final PromoBanner banner;
+  final VoidCallback onOrder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(26),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryDark.withValues(alpha: 0.28),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(26),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              NetImage(banner.imageUrl),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerRight,
+                    end: Alignment.centerLeft,
+                    colors: [Color(0xF27A0F0F), Color(0x00000000)],
+                    stops: [0.35, 0.95],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(banner.tag,
+                          style: const TextStyle(
+                              color: AppColors.text,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900)),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(banner.title,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            height: 1.15,
+                            fontWeight: FontWeight.w900)),
+                    const SizedBox(height: 6),
+                    Text(banner.subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 12)),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: onOrder,
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(8, 7, 16, 7),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('اطلب الآن',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold)),
+                            SizedBox(width: 8),
+                            CircleAvatar(
+                              radius: 11,
+                              backgroundColor: Colors.white,
+                              child: Icon(Icons.arrow_back,
+                                  size: 14, color: AppColors.primary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -477,7 +561,7 @@ class _OfferStrip extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  NetImage(pexels(2271107, w: 600), width: 150, height: 130),
+                  NetImage(img('burger_fries'), width: 150, height: 130),
                   Positioned(
                     top: 10,
                     left: 10,

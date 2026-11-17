@@ -4,36 +4,50 @@ import 'models.dart';
 String pexels(int id, {int w = 900}) =>
     'https://images.pexels.com/photos/$id/pexels-photo-$id.jpeg?auto=compress&cs=tinysrgb&w=$w';
 
+/// صورة حقيقية مدمجة داخل التطبيق (assets/images) — تظهر فوراً وبدون إنترنت.
+String img(String name) => 'assets/images/$name.jpg';
+
+/// صورة حقيقية مناسبة لتصنيف حسب اسمه.
+String categoryPhoto(String name) {
+  if (name.contains('برجر') || name.contains('ساندو')) return img('cheeseburger');
+  if (name.contains('مشروب') || name.contains('عصير')) return img('juices');
+  if (name.contains('حلو') || name.contains('تحلية')) return img('choco_cake');
+  if (name.contains('بطاط') || name.contains('جانب')) return img('fries');
+  if (name.contains('سلط')) return img('salad');
+  if (name.contains('وجب') || name.contains('كومبو')) return img('zinger_meal');
+  return img('strips');
+}
+
 /// منيو احتياطي يظهر عند عدم توفر الاتصال أو قبل تفعيل متجر المطعم على دوري.
 /// عند ربط المطعم تُستبدل هذه البيانات تلقائياً بأصناف دوري الحقيقية.
 class DemoMenu {
   DemoMenu._();
 
-  static const categories = <FoodCategory>[
-    FoodCategory(id: 1, name: 'دجاج مقرمش', emoji: '🍗'),
-    FoodCategory(id: 2, name: 'برجر', emoji: '🍔'),
-    FoodCategory(id: 3, name: 'وجبات', emoji: '🍱'),
-    FoodCategory(id: 4, name: 'جانبيات', emoji: '🍟'),
-    FoodCategory(id: 5, name: 'مشروبات', emoji: '🥤'),
-    FoodCategory(id: 6, name: 'حلويات', emoji: '🍰'),
+  static final categories = <FoodCategory>[
+    FoodCategory(id: 1, name: 'دجاج مقرمش', emoji: '🍗', imageUrl: img('strips')),
+    FoodCategory(id: 2, name: 'برجر', emoji: '🍔', imageUrl: img('cheeseburger')),
+    FoodCategory(id: 3, name: 'وجبات', emoji: '🍱', imageUrl: img('zinger_meal')),
+    FoodCategory(id: 4, name: 'جانبيات', emoji: '🍟', imageUrl: img('fries')),
+    FoodCategory(id: 5, name: 'مشروبات', emoji: '🥤', imageUrl: img('juices')),
+    FoodCategory(id: 6, name: 'حلويات', emoji: '🍰', imageUrl: img('choco_cake')),
   ];
 
   static final banners = <PromoBanner>[
     PromoBanner(
       title: 'مقرمش. طازج.\nلا يُقاوَم.',
       subtitle: 'دجاج طازج 100% يُحضَّر عند الطلب',
-      imageUrl: pexels(1059943, w: 1200),
+      imageUrl: img('strips'),
     ),
     PromoBanner(
       title: 'خصم 30%\nعلى الوجبات',
       subtitle: 'على وجبات البرجر المختارة',
-      imageUrl: pexels(2983101, w: 1200),
+      imageUrl: img('banner_burger'),
       tag: 'عرض حصري',
     ),
     PromoBanner(
       title: 'حلّي\nعلى حسابنا',
       subtitle: 'تحلية مجانية مع كل طلب فوق 80 ₪',
-      imageUrl: pexels(291528, w: 1200),
+      imageUrl: img('choco_cake'),
       tag: 'هذا الأسبوع',
     ),
   ];
@@ -46,8 +60,8 @@ class DemoMenu {
       description:
           'شرائح صدر دجاج متبّلة بخلطتنا السرية، مغطاة بطبقة مقرمشة ذهبية ومقلية حتى الكمال. تُقدَّم مع صوصين حسب اختيارك.',
       price: 32,
-      imageUrl: pexels(1059943),
-      gallery: [pexels(1059943), pexels(2233370), pexels(14715949)],
+      imageUrl: img('strips'),
+      gallery: [img('strips'), img('neon_strips'), img('tenders')],
       categoryId: 1,
       categoryName: 'دجاج مقرمش',
       isFeatured: true,
@@ -62,8 +76,8 @@ class DemoMenu {
           'قطع دجاج مقرمشة مغمورة بصوص الشيدر الذائب ورشة بابريكا مدخنة. وجبة غنية لعشاق الجبن.',
       price: 36,
       salePrice: 30,
-      imageUrl: pexels(14715949),
-      gallery: [pexels(14715949), pexels(1059943)],
+      imageUrl: img('tenders'),
+      gallery: [img('tenders'), img('strips')],
       categoryId: 1,
       categoryName: 'دجاج مقرمش',
       isFeatured: true,
@@ -77,8 +91,8 @@ class DemoMenu {
       description:
           'أجنحة دجاج متبّلة بالبهارات الحارة والأعشاب، مشوية على الفحم حتى تتحمّر. 10 قطع مع صوص الثوم.',
       price: 34,
-      imageUrl: pexels(2338407),
-      gallery: [pexels(2338407), pexels(7353380)],
+      imageUrl: img('wings'),
+      gallery: [img('wings'), img('spicy_chicken')],
       categoryId: 1,
       categoryName: 'دجاج مقرمش',
       rating: 4.7,
@@ -90,7 +104,7 @@ class DemoMenu {
       description:
           'قطع دجاج مقلية ومقلّبة بصوص الفلفل الأحمر الحار والليمون والكزبرة. لمحبي الحرارة الحقيقية 🌶️',
       price: 38,
-      imageUrl: pexels(7353380),
+      imageUrl: img('spicy_chicken'),
       categoryId: 1,
       categoryName: 'دجاج مقرمش',
       rating: 4.6,
@@ -103,8 +117,8 @@ class DemoMenu {
       description:
           'دجاجة كاملة متبّلة لمدة 12 ساعة ومشوية ببطء حتى تصبح ذهبية وطرية من الداخل. تكفي 3-4 أشخاص.',
       price: 65,
-      imageUrl: pexels(6210747),
-      gallery: [pexels(6210747), pexels(616354)],
+      imageUrl: img('roast_chicken'),
+      gallery: [img('roast_chicken'), img('whole_chicken')],
       categoryId: 1,
       categoryName: 'دجاج مقرمش',
       rating: 4.8,
@@ -119,8 +133,8 @@ class DemoMenu {
       description:
           'صدر دجاج مقرمش حار مع خس طازج وصوص المايونيز الخاص، داخل خبز بريوش محمّص.',
       price: 28,
-      imageUrl: pexels(13573664),
-      gallery: [pexels(13573664), pexels(9975765)],
+      imageUrl: img('zinger'),
+      gallery: [img('zinger'), img('zinger_meal')],
       categoryId: 2,
       categoryName: 'برجر',
       isFeatured: true,
@@ -134,8 +148,8 @@ class DemoMenu {
       description:
           'قطعة لحم أنغوس مشوية على اللهب مع شريحتي جبن شيدر، طماطم، خس، مخلل وصوص البيت.',
       price: 35,
-      imageUrl: pexels(1639557),
-      gallery: [pexels(1639557), pexels(3738730)],
+      imageUrl: img('cheeseburger'),
+      gallery: [img('cheeseburger'), img('classic_burger')],
       categoryId: 2,
       categoryName: 'برجر',
       isFeatured: true,
@@ -148,7 +162,7 @@ class DemoMenu {
       description:
           'طبقتان من اللحم البقري مع جبن ذائب وبصل مكرمل وفلفل حار. للجوعانين فقط!',
       price: 45,
-      imageUrl: pexels(1633578),
+      imageUrl: img('double_burger'),
       categoryId: 2,
       categoryName: 'برجر',
       rating: 4.7,
@@ -161,7 +175,7 @@ class DemoMenu {
       description:
           'برجر لحم طازج مع خس وطماطم وبصل وصوص الكاتشب والمسطردة. الطعم الأصلي اللي بتحبه.',
       price: 26,
-      imageUrl: pexels(3738730),
+      imageUrl: img('classic_burger'),
       categoryId: 2,
       categoryName: 'برجر',
       rating: 4.6,
@@ -176,7 +190,7 @@ class DemoMenu {
           'زنجر برجر مقرمش مع بطاطا مقلية وسط ومشروب غازي بارد. الوجبة المثالية للغداء.',
       price: 39,
       salePrice: 33,
-      imageUrl: pexels(9975765),
+      imageUrl: img('zinger_meal'),
       categoryId: 3,
       categoryName: 'وجبات',
       isFeatured: true,
@@ -191,7 +205,7 @@ class DemoMenu {
           'تشيز برجر مع بطاطا مقرمشة وصوص الجبنة. وجبة متكاملة تشبع وتسعد.',
       price: 42,
       salePrice: 36,
-      imageUrl: pexels(2271107),
+      imageUrl: img('burger_fries'),
       categoryId: 3,
       categoryName: 'وجبات',
       rating: 4.8,
@@ -203,7 +217,7 @@ class DemoMenu {
       description:
           'ساندويتش ثلاث طبقات بالدجاج المدخن والجبن والبيض والخضار، مع بطاطا مقلية.',
       price: 34,
-      imageUrl: pexels(1600711),
+      imageUrl: img('club'),
       categoryId: 3,
       categoryName: 'وجبات',
       rating: 4.7,
@@ -216,7 +230,7 @@ class DemoMenu {
           'برجرين + 8 قطع ستربس + بطاطا عائلي + 4 صوصات + لتر مشروب. يكفي 4 أشخاص.',
       price: 119,
       salePrice: 99,
-      imageUrl: pexels(70497),
+      imageUrl: img('family_box'),
       categoryId: 3,
       categoryName: 'وجبات',
       isFeatured: true,
@@ -232,8 +246,8 @@ class DemoMenu {
       name: 'بطاطا مقلية ذهبية',
       description: 'بطاطا مقطّعة طازجة ومقلية مرتين لقرمشة لا تُنسى، مع ملح البحر.',
       price: 12,
-      imageUrl: pexels(1583884),
-      gallery: [pexels(1583884), pexels(115740)],
+      imageUrl: img('fries'),
+      gallery: [img('fries'), img('fries2')],
       categoryId: 4,
       categoryName: 'جانبيات',
       rating: 4.8,
@@ -244,7 +258,7 @@ class DemoMenu {
       name: 'بطاطا حلوة مع صوص',
       description: 'أصابع البطاطا الحلوة المقرمشة مع صوص الشيبوتلي المدخن.',
       price: 16,
-      imageUrl: pexels(1893555),
+      imageUrl: img('sweet_fries'),
       categoryId: 4,
       categoryName: 'جانبيات',
       rating: 4.7,
@@ -255,7 +269,7 @@ class DemoMenu {
       name: 'حلقات بصل وناجتس',
       description: 'تشكيلة مقرمشة: حلقات بصل، ناجتس دجاج وبطاطا مع صوص الرانش.',
       price: 22,
-      imageUrl: pexels(6941010),
+      imageUrl: img('onion_rings'),
       categoryId: 4,
       categoryName: 'جانبيات',
       rating: 4.6,
@@ -266,7 +280,7 @@ class DemoMenu {
       name: 'سلطة الدجاج المقرمش',
       description: 'خس روماني، طماطم كرزية، جبن بارميزان وقطع دجاج مقرمشة مع صوص السيزر.',
       price: 24,
-      imageUrl: pexels(2097090),
+      imageUrl: img('salad'),
       categoryId: 4,
       categoryName: 'جانبيات',
       rating: 4.6,
@@ -279,7 +293,7 @@ class DemoMenu {
       name: 'موهيتو ليمون ونعناع',
       description: 'ليمون طازج ونعناع وثلج مجروش مع صودا منعشة.',
       price: 14,
-      imageUrl: pexels(1187766),
+      imageUrl: img('mojito'),
       categoryId: 5,
       categoryName: 'مشروبات',
       rating: 4.8,
@@ -291,7 +305,7 @@ class DemoMenu {
       name: 'عصير برتقال طازج',
       description: 'برتقال معصور عند الطلب بدون إضافات.',
       price: 12,
-      imageUrl: pexels(96974),
+      imageUrl: img('orange'),
       categoryId: 5,
       categoryName: 'مشروبات',
       rating: 4.7,
@@ -303,7 +317,7 @@ class DemoMenu {
       name: 'عصير بطيخ',
       description: 'بطيخ أحمر بارد ومنعش، مثالي مع الوجبات الحارة.',
       price: 13,
-      imageUrl: pexels(1337825),
+      imageUrl: img('watermelon'),
       categoryId: 5,
       categoryName: 'مشروبات',
       rating: 4.6,
@@ -315,7 +329,7 @@ class DemoMenu {
       name: 'مشروبات غازية',
       description: 'علبة باردة من مشروبك الغازي المفضّل.',
       price: 6,
-      imageUrl: pexels(3407777),
+      imageUrl: img('sodas'),
       categoryId: 5,
       categoryName: 'مشروبات',
       rating: 4.5,
@@ -329,7 +343,7 @@ class DemoMenu {
       name: 'كيكة الشوكولاتة الفاخرة',
       description: 'طبقات من الكيك الإسفنجي بالشوكولاتة البلجيكية والكريمة الغنية.',
       price: 18,
-      imageUrl: pexels(291528),
+      imageUrl: img('choco_cake'),
       categoryId: 6,
       categoryName: 'حلويات',
       isFeatured: true,
@@ -342,7 +356,7 @@ class DemoMenu {
       name: 'تشيز كيك التوت',
       description: 'تشيز كيك نيويورك كريمي مع صوص التوت الأحمر الطازج.',
       price: 20,
-      imageUrl: pexels(1126359),
+      imageUrl: img('cheesecake'),
       categoryId: 6,
       categoryName: 'حلويات',
       rating: 4.8,
@@ -354,7 +368,7 @@ class DemoMenu {
       name: 'براونيز بالشوكولاتة',
       description: 'براونيز طرية من الداخل مع قطع الشوكولاتة والتوت.',
       price: 15,
-      imageUrl: pexels(3026804),
+      imageUrl: img('brownies'),
       categoryId: 6,
       categoryName: 'حلويات',
       rating: 4.7,
@@ -366,7 +380,7 @@ class DemoMenu {
       name: 'تارت الفواكه',
       description: 'تارت مقرمش بكريمة الفانيلا وتشكيلة فواكه موسمية.',
       price: 17,
-      imageUrl: pexels(461431),
+      imageUrl: img('tart'),
       categoryId: 6,
       categoryName: 'حلويات',
       rating: 4.6,
@@ -377,23 +391,23 @@ class DemoMenu {
 
   /// صور جاهزة يمكن للمالك اختيارها عند إضافة صنف جديد.
   static final ownerGallery = <String, String>{
-    'ستربس دجاج': pexels(1059943),
-    'تندرز بالشيدر': pexels(14715949),
-    'أجنحة': pexels(2338407),
-    'دجاج حار': pexels(7353380),
-    'دجاج مشوي': pexels(6210747),
-    'زنجر': pexels(13573664),
-    'تشيز برجر': pexels(1639557),
-    'دبل برجر': pexels(1633578),
-    'وجبة زنجر': pexels(9975765),
-    'برجر وبطاطا': pexels(2271107),
-    'بطاطا': pexels(1583884),
-    'ناجتس وحلقات': pexels(6941010),
-    'سلطة': pexels(2097090),
-    'موهيتو': pexels(1187766),
-    'برتقال': pexels(96974),
-    'كيكة شوكولاتة': pexels(291528),
-    'تشيز كيك': pexels(1126359),
-    'براونيز': pexels(3026804),
+    'ستربس دجاج': img('strips'),
+    'تندرز بالشيدر': img('tenders'),
+    'أجنحة': img('wings'),
+    'دجاج حار': img('spicy_chicken'),
+    'دجاج مشوي': img('roast_chicken'),
+    'زنجر': img('zinger'),
+    'تشيز برجر': img('cheeseburger'),
+    'دبل برجر': img('double_burger'),
+    'وجبة زنجر': img('zinger_meal'),
+    'برجر وبطاطا': img('burger_fries'),
+    'بطاطا': img('fries'),
+    'ناجتس وحلقات': img('onion_rings'),
+    'سلطة': img('salad'),
+    'موهيتو': img('mojito'),
+    'برتقال': img('orange'),
+    'كيكة شوكولاتة': img('choco_cake'),
+    'تشيز كيك': img('cheesecake'),
+    'براونيز': img('brownies'),
   };
 }

@@ -5,6 +5,8 @@
 /// - كل طلب = حجز (booking) لكل صنف، ومعه نوع الطلب (طاولة / توصيل) في الملاحظات والإجابات.
 library;
 
+import 'demo_menu.dart' show categoryPhoto;
+
 double _toDouble(dynamic v) {
   if (v == null) return 0;
   if (v is num) return v.toDouble();
@@ -36,7 +38,9 @@ class FoodCategory {
     return FoodCategory(
       id: _toInt(json['id']),
       name: name,
-      imageUrl: json['image']?.toString(),
+      imageUrl: (json['image'] == null || json['image'].toString().isEmpty)
+          ? categoryPhoto(name)
+          : json['image'].toString(),
       emoji: emojiFor(name),
     );
   }
