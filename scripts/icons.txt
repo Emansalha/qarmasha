@@ -46,3 +46,5 @@ refresh|Counterclockwise arrows button
 lightning|High voltage
 cook|Cooking
 trash|Wastebasket
+yum|Face savoring food
+heart_eyes|Smiling face with heart-eyes
