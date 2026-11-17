@@ -41,11 +41,12 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         icon: const Icon(Icons.add),
         label: const Text('صنف جديد'),
         onPressed: () async {
+          final appState = AppScope.read(context);
           final added = await Navigator.push<bool>(context,
               MaterialPageRoute(builder: (_) => const AddItemScreen()));
           if (added == true && mounted) {
             _reload();
-            AppScope.read(context).loadMenu();
+            appState.loadMenu();
           }
         },
       ),

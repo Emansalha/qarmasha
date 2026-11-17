@@ -279,7 +279,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
             const _H('التصنيف'),
             DropdownButtonFormField<int?>(
-              value: _categoryId,
+              key: ValueKey('cat-$_categoryId-${_categories.length}'),
+              initialValue: _categoryId,
               decoration: const InputDecoration(),
               hint: const Text('بدون تصنيف'),
               items: [
@@ -323,7 +324,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             const SizedBox(height: 10),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
               title: const Text('صنف مميز (يظهر في الرئيسية)'),
               value: _featured,
               onChanged: (v) => setState(() => _featured = v),
