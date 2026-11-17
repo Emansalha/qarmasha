@@ -30,8 +30,8 @@ for (const s of screens) {
     await page.mouse.wheel(0, 900);
     await page.waitForTimeout(2500);
     await page.screenshot({ path: `shots/home_3.png` });
-    await page.mouse.wheel(0, 1100);
-    await page.waitForTimeout(2500);
+    for (let k = 0; k < 4; k++) { await page.mouse.wheel(0, 700); await page.waitForTimeout(600); }
+    await page.waitForTimeout(2000);
     await page.screenshot({ path: `shots/home_4.png` });
   }
   if (s === 'item') {
