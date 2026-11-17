@@ -473,3 +473,123 @@ class BounceIn extends StatelessWidget {
     );
   }
 }
+
+/// زر «اسحب للبدء»: مقبض دائري تسحبه حتى نهاية الشريط.
+class SwipeToStart extends StatefulWidget {
+  const SwipeToStart({super.key, required this.label, required this.onDone});
+  final String label;
+  final VoidCallback onDone;
+
+  @override
+  State<SwipeToStart> createState() => _SwipeToStartState();
+}
+
+class _SwipeToStartState extends State<SwipeToStart>
+    with SingleTickerProviderStateMixin {
+  double _drag = 0;
+  bool _done = false;
+  late final AnimationController _hint = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 1200))
+    ..repeat();
+
+  @override
+  void dispose() {
+    _hint.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const h = 64.0;
+    const knob = 54.0;
+    return LayoutBuilder(builder: (context, c) {
+      final max = c.maxWidth - knob - 10;
+      final p = (_drag / max).clamp(0.0, 1.0);
+      return Container(
+        height: h,
+        decoration: BoxDecoration(
+          gradient: AppColors.fire,
+          borderRadius: BorderRadius.circular(h / 2),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.4),
+              blurRadius: 24,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // النص والأسهم المتحركة
+            Opacity(
+              opacity: 1 - p,
+              child: AnimatedBuilder(
+                animation: _hint,
+                builder: (context, _) => Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(widget.label,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900)),
+                    const SizedBox(width: 10),
+                    for (var i = 0; i < 3; i++)
+                      Opacity(
+                        opacity: (((_hint.value * 3) - i) % 3 < 1) ? 1.0 : 0.35,
+                        child: const Icon(Icons.chevron_left_rounded,
+                            color: Colors.white, size: 22),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            // المقبض (يبدأ من اليمين في RTL)
+            PositionedDirectional(
+              start: 5 + _drag.clamp(0.0, max),
+              top: 5,
+              child: GestureDetector(
+                onHorizontalDragUpdate: (d) {
+                  if (_done) return;
+                  // في RTL السحب لليسار = تقدّم
+                  final rtl = Directionality.of(context) == TextDirection.rtl;
+                  setState(() => _drag =
+                      (_drag + (rtl ? -d.delta.dx : d.delta.dx)).clamp(0.0, max));
+                  if (_drag >= max * 0.98) {
+                    _done = true;
+                    HapticFeedback.heavyImpact();
+                    widget.onDone();
+                  }
+                },
+                onHorizontalDragEnd: (_) {
+                  if (!_done) setState(() => _drag = 0);
+                },
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  setState(() => _drag = max * 0.25);
+                  Future<void>.delayed(const Duration(milliseconds: 250), () {
+                    if (mounted && !_done) setState(() => _drag = 0);
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 120),
+                  width: knob,
+                  height: knob,
+                  decoration: const BoxDecoration(
+                    color: AppColors.background,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    p > 0.9 ? Icons.check_rounded : Icons.arrow_back_rounded,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}

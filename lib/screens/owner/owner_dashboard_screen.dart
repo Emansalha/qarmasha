@@ -83,7 +83,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: softShadow(),
                 ),

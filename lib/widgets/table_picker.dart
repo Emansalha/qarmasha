@@ -33,7 +33,7 @@ class TableGrid extends StatelessWidget {
             curve: Curves.easeOutBack,
             decoration: BoxDecoration(
               gradient: sel ? AppColors.fire : null,
-              color: sel ? null : Colors.white,
+              color: sel ? null : AppColors.surface,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
                   color: sel ? Colors.transparent : AppColors.border),

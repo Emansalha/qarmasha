@@ -67,7 +67,7 @@ class _OrderCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(22),
           boxShadow: softShadow(),
         ),
@@ -150,7 +150,7 @@ class OrderDetailsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(22),
               boxShadow: softShadow(),
             ),
@@ -225,7 +225,7 @@ class OrderDetailsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(22),
               boxShadow: softShadow(),
             ),

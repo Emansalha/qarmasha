@@ -95,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 32),
                 Text('تسجيل الدخول',
                     style: TextStyle(
-                        color: Colors.brown.shade700,
+                        color: AppColors.primary,
                         fontSize: 14,
                         fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),

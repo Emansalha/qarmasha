@@ -59,7 +59,7 @@ class OrderSuccessScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(22),
                   boxShadow: softShadow(),
                 ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../core/theme.dart';
+import '../data/models.dart';
 import '../widgets/animations.dart';
 import '../widgets/common.dart';
-import '../widgets/icon3d.dart';
 import '../state/app_state.dart';
 import 'home_screen.dart';
 import 'menu_screen.dart';
@@ -77,87 +77,48 @@ class _MainShellState extends State<MainShell> {
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(
-          height: 74,
-          margin: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+          height: 72,
+          margin: const EdgeInsets.fromLTRB(40, 0, 40, 12),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: softShadow(),
+            color: AppColors.surface2,
+            borderRadius: BorderRadius.circular(36),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.5),
+                blurRadius: 30,
+                offset: const Offset(0, 12),
+              ),
+            ],
           ),
           child: Row(
             children: [
               _NavItem(
-                  image: 'home',
                   icon: Icons.home_rounded,
                   label: 'الرئيسية',
                   selected: _index == 0,
                   onTap: () => select(0)),
               _NavItem(
-                  image: 'menu',
-                  icon: Icons.grid_view_rounded,
+                  icon: Icons.restaurant_menu_rounded,
                   label: 'المنيو',
                   selected: _index == 1,
                   onTap: () => select(1)),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => select(2),
-                  child: Transform.translate(
-                    offset: const Offset(0, -18),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 4),
-                            boxShadow: [
-                              BoxShadow(
-                                color:
-                                    AppColors.primary.withValues(alpha: 0.35),
-                                blurRadius: 14,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              BounceIn(
-                                active: _index == 2,
-                                child: const Icon3D('orders', size: 30),
-                              ),
-                              if (state.orders.isNotEmpty)
-                                Positioned(
-                                  top: 10,
-                                  left: 12,
-                                  child: Container(
-                                    width: 9,
-                                    height: 9,
-                                    decoration: const BoxDecoration(
-                                        color: AppColors.accent,
-                                        shape: BoxShape.circle),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
               _NavItem(
-                  image: 'offers',
-                  icon: Icons.local_offer_outlined,
+                  icon: Icons.receipt_long_rounded,
+                  label: 'طلباتي',
+                  selected: _index == 2,
+                  dot: state.orders.any((o) =>
+                      o.status == OrderStatus.pending ||
+                      o.status == OrderStatus.preparing),
+                  onTap: () => select(2)),
+              _NavItem(
+                  icon: Icons.local_offer_rounded,
                   label: 'العروض',
                   selected: _index == 3,
                   onTap: () => select(3)),
               _NavItem(
-                  image: 'profile',
-                  icon: Icons.person_outline_rounded,
+                  icon: Icons.person_rounded,
                   label: 'حسابي',
                   selected: _index == 4,
                   onTap: () => select(4)),
@@ -169,55 +130,69 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
+/// عنصر تنقل: دائرة برتقالية متوهجة حول التبويب النشط.
 class _NavItem extends StatelessWidget {
   const _NavItem({
-    required this.image,
     required this.icon,
     required this.label,
     required this.selected,
     required this.onTap,
+    this.dot = false,
   });
 
-  final String image;
   final IconData icon;
   final String label;
   final bool selected;
+  final bool dot;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Pressable(
-        scale: 0.88,
-        onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 280),
-              curve: Curves.easeOutBack,
-              padding: EdgeInsets.all(selected ? 6 : 4),
-              decoration: BoxDecoration(
-                color: selected ? AppColors.cream : Colors.transparent,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: BounceIn(
-                active: selected,
-                child: Icon3D(image, size: 24, grayscale: !selected),
-              ),
+      child: Tooltip(
+        message: label,
+        child: Pressable(
+          scale: 0.85,
+          onTap: onTap,
+          child: Center(
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 350),
+                  curve: Curves.easeOutBack,
+                  width: selected ? 52 : 44,
+                  height: selected ? 52 : 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: selected ? AppColors.fire : null,
+                    boxShadow: selected ? glowShadow() : null,
+                  ),
+                  child: BounceIn(
+                    active: selected,
+                    child: Icon(icon,
+                        size: 24,
+                        color: selected ? Colors.white : AppColors.muted),
+                  ),
+                ),
+                if (dot)
+                  Positioned(
+                    top: 6,
+                    left: 8,
+                    child: Container(
+                      width: 9,
+                      height: 9,
+                      decoration: BoxDecoration(
+                        color: AppColors.accent,
+                        shape: BoxShape.circle,
+                        border:
+                            Border.all(color: AppColors.surface2, width: 1.5),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 2),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
-              style: TextStyle(
-                fontFamily: kFont,
-                fontSize: 11,
-                color: selected ? AppColors.primary : AppColors.muted,
-                fontWeight: selected ? FontWeight.w900 : FontWeight.w500,
-              ),
-              child: Text(label),
-            ),
-          ],
+          ),
         ),
       ),
     );

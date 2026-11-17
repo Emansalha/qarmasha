@@ -7,6 +7,7 @@ import '../state/app_state.dart';
 import '../widgets/common.dart';
 import '../widgets/animations.dart';
 import '../widgets/flame_logo.dart';
+import '../widgets/icon3d.dart';
 import 'auth/login_screen.dart';
 import 'main_shell.dart';
 
@@ -97,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen>
               gradient: RadialGradient(
                 center: Alignment(0, -0.2),
                 radius: 1.1,
-                colors: [Color(0xFFE63E2E), AppColors.primary, Color(0xFF7A1010)],
+                colors: [Color(0xFF3B1E12), AppColors.background, Color(0xFF080808)],
                 stops: [0.0, 0.5, 1.0],
               ),
             ),
@@ -131,8 +132,8 @@ class _SplashScreenState extends State<SplashScreen>
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: Colors.white.withValues(
-                                        alpha: (1 - t) * 0.35 * show),
+                                    color: AppColors.primary.withValues(
+                                        alpha: (1 - t) * 0.5 * show),
                                     width: 2,
                                   ),
                                 ),
@@ -146,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen>
                               height: 150,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.12),
+                                color: AppColors.primary.withValues(alpha: 0.12),
                               ),
                             ),
                           ),
@@ -155,6 +156,7 @@ class _SplashScreenState extends State<SplashScreen>
                             height: 120,
                             child: CustomPaint(
                               painter: FlamePainter(
+                                outerColor: AppColors.primary,
                                 outerProgress: _outer.value.clamp(0.0, 1.2),
                                 innerProgress: _inner.value.clamp(0.0, 1.1),
                                 flicker: _loop.value,
@@ -281,7 +283,8 @@ class AppLogo extends StatelessWidget {
   }
 }
 
-/// شاشات تعريفية (Onboarding) بصور حقيقية وانتقالات سلسة.
+/// شاشة البداية: صورة كاملة، عنوان ضخم متدرّج، بطاقة صورة مائلة،
+/// وزر «اسحب للبدء».
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -289,74 +292,42 @@ class WelcomeScreen extends StatefulWidget {
   State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> {
-  final _controller = PageController();
-  double _page = 0;
-
-  static final _pages = [
-    (
-      image: img('strips'),
-      tag: 'دجاج طازج 100%',
-      title: 'قرمشة\nما بتنتسى 🔥',
-      body: 'دجاج متبّل بخلطتنا السرية ومقلي لحظة طلبك، ذهبي ومقرمش من أول لقمة.',
-    ),
-    (
-      image: img('zinger_meal'),
-      tag: 'داخل المطعم',
-      title: 'اطلب من\nطاولتك 🍽️',
-      body: 'اختر رقم طاولتك واطلب من جوالك، ونحن نجيب الطلب لعندك بدون انتظار.',
-    ),
-    (
-      image: img('family_box'),
-      tag: 'توصيل سريع',
-      title: 'أو خلّيه\nيوصلك 🛵',
-      body: 'وجباتك المفضّلة ساخنة لباب البيت خلال 30-45 دقيقة، مع تتبّع مباشر للطلب.',
-    ),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.addListener(() {
-      setState(() => _page = _controller.page ?? 0);
-    });
-  }
+class _WelcomeScreenState extends State<WelcomeScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _float = AnimationController(
+      vsync: this, duration: const Duration(seconds: 4))
+    ..repeat(reverse: true);
 
   @override
   void dispose() {
-    _controller.dispose();
+    _float.dispose();
     super.dispose();
   }
 
   void _finish(Widget next) {
     AppScope.read(context).markOnboardingSeen();
-    Navigator.pushReplacement(context, SmoothRoute<void>(builder: (_) => next));
+    Navigator.pushReplacement(context, RevealRoute<void>(builder: (_) => next));
   }
 
   @override
   Widget build(BuildContext context) {
-    final last = _page > _pages.length - 1.5;
-    final index = _page.round().clamp(0, _pages.length - 1).toInt();
+    final h = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: AppColors.ink,
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          // صور بتأثير Parallax
-          PageView.builder(
-            controller: _controller,
-            itemCount: _pages.length,
-            itemBuilder: (_, i) {
-              final delta = (_page - i);
-              return ClipRect(
-                child: Transform.translate(
-                  offset: Offset(delta * 120, 0),
-                  child: Transform.scale(
-                    scale: 1.15 - delta.abs() * 0.1,
-                    child: NetImage(_pages[i].image),
-                  ),
-                ),
-              );
-            },
+          // الصورة الرئيسية مع حركة طفو بطيئة
+          AnimatedBuilder(
+            animation: _float,
+            builder: (context, child) => Transform.scale(
+              scale: 1.08 + 0.04 * _float.value,
+              child: child,
+            ),
+            child: SizedBox(
+              height: h * 0.62,
+              width: double.infinity,
+              child: NetImage(img('spicy_chicken')),
+            ),
           ),
           const IgnorePointer(
             child: DecoratedBox(
@@ -365,12 +336,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0x99000000),
+                    Color(0x88000000),
                     Colors.transparent,
-                    Color(0xCC1C1210),
-                    AppColors.ink,
+                    Color(0xDD131313),
+                    AppColors.background,
                   ],
-                  stops: [0, 0.3, 0.62, 0.85],
+                  stops: [0, 0.22, 0.5, 0.62],
                 ),
               ),
               child: SizedBox.expand(),
@@ -378,155 +349,117 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+              padding: const EdgeInsets.fromLTRB(24, 10, 24, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      const AppLogo(light: true, size: 22),
+                      const AppLogo(light: true, size: 20),
                       const Spacer(),
-                      if (!last)
-                        TextButton(
-                          onPressed: () => _controller.animateToPage(
-                            _pages.length - 1,
-                            duration: const Duration(milliseconds: 600),
-                            curve: Curves.easeInOutCubic,
-                          ),
-                          child: const Text('تخطي',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700)),
-                        ),
+                      TextButton(
+                        onPressed: () => _finish(const LoginScreen()),
+                        child: const Text('تسجيل الدخول',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800)),
+                      ),
                     ],
                   ),
                   const Spacer(),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 400),
-                    transitionBuilder: (c, a) => FadeTransition(
-                      opacity: a,
-                      child: SlideTransition(
-                        position: Tween(
-                                begin: const Offset(0, 0.15),
-                                end: Offset.zero)
-                            .animate(a),
-                        child: c,
-                      ),
-                    ),
-                    child: Column(
-                      key: ValueKey(index),
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  SizedBox(
+                    height: 250,
+                    child: Stack(
+                      clipBehavior: Clip.none,
                       children: [
-                        Tag(_pages[index].tag),
-                        const SizedBox(height: 14),
-                        Text(
-                          _pages[index].title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 38,
-                            height: 1.2,
-                            fontWeight: FontWeight.w900,
+                        // العنوان الضخم
+                        const FadeSlideIn(
+                          index: 1,
+                          offset: 40,
+                          child: Text.rich(
+                            TextSpan(
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 60,
+                                height: 1.05,
+                                fontWeight: FontWeight.w900,
+                              ),
+                              children: [
+                                TextSpan(text: 'قرمِش.\n'),
+                                TextSpan(text: 'كُل.\n'),
+                                TextSpan(
+                                  text: 'استمتع!',
+                                  style: TextStyle(color: AppColors.primary),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          _pages[index].body,
-                          style: const TextStyle(
-                              color: Colors.white70, height: 1.7, fontSize: 15),
+                        // إيموجي ثلاثي الأبعاد
+                        Positioned(
+                          top: 70,
+                          left: 120,
+                          child: AnimatedBuilder(
+                            animation: _float,
+                            builder: (context, child) => Transform.rotate(
+                              angle: -0.15 + 0.3 * _float.value,
+                              child: child,
+                            ),
+                            child: const BounceIn(
+                                active: true, child: Icon3D('yum', size: 54)),
+                          ),
+                        ),
+                        // بطاقة صورة مائلة
+                        Positioned(
+                          left: 0,
+                          bottom: 10,
+                          child: AnimatedBuilder(
+                            animation: _float,
+                            builder: (context, child) => Transform.translate(
+                              offset: Offset(0, -6 * _float.value),
+                              child: Transform.rotate(
+                                  angle: 0.1 - 0.04 * _float.value,
+                                  child: child),
+                            ),
+                            child: Container(
+                              width: 120,
+                              height: 140,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                    color: Colors.white, width: 4),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                        Colors.black.withValues(alpha: 0.5),
+                                    blurRadius: 24,
+                                    offset: const Offset(0, 12),
+                                  ),
+                                ],
+                              ),
+                              child: NetImage(img('wings'), radius: 20),
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 26),
-                  Row(
-                    children: [
-                      for (var i = 0; i < _pages.length; i++)
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: const EdgeInsets.only(left: 6),
-                          width: index == i ? 28 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: index == i
-                                ? AppColors.primary
-                                : Colors.white30,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      const Spacer(),
-                      if (!last)
-                        Pressable(
-                          onTap: () => _controller.nextPage(
-                            duration: const Duration(milliseconds: 550),
-                            curve: Curves.easeInOutCubic,
-                          ),
-                          child: SizedBox(
-                            width: 70,
-                            height: 70,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                SizedBox(
-                                  width: 70,
-                                  height: 70,
-                                  child: CircularProgressIndicator(
-                                    value: (_page + 1) / _pages.length,
-                                    strokeWidth: 3,
-                                    color: AppColors.accent,
-                                    backgroundColor: Colors.white24,
-                                  ),
-                                ),
-                                Container(
-                                  width: 56,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    gradient: AppColors.fire,
-                                    shape: BoxShape.circle,
-                                    boxShadow: glowShadow(),
-                                  ),
-                                  child: const Icon(Icons.arrow_back_rounded,
-                                      color: Colors.white),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
+                  const SizedBox(height: 14),
+                  const FadeSlideIn(
+                    index: 3,
+                    child: Text(
+                      'دجاج مقرمش وبرجر طازج يُحضَّر لحظة طلبك.\nاطلب من طاولتك أو خلّيه يوصلك. سهل. سريع. لذيذ.',
+                      style: TextStyle(
+                          color: AppColors.muted, height: 1.7, fontSize: 14),
+                    ),
                   ),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 350),
-                    curve: Curves.easeOutCubic,
-                    child: last
-                        ? Padding(
-                            padding: const EdgeInsets.only(top: 22),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () =>
-                                      _finish(const LoginScreen()),
-                                  child: const Text('تسجيل الدخول'),
-                                ),
-                                const SizedBox(height: 12),
-                                OutlinedButton(
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: Colors.white,
-                                    minimumSize: const Size.fromHeight(54),
-                                    side: const BorderSide(
-                                        color: Colors.white38),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(18),
-                                    ),
-                                  ),
-                                  onPressed: () => _finish(const MainShell()),
-                                  child: const Text('تصفّح المنيو أولاً',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w800)),
-                                ),
-                              ],
-                            ),
-                          )
-                        : const SizedBox(width: double.infinity),
+                  const SizedBox(height: 28),
+                  FadeSlideIn(
+                    index: 5,
+                    child: SwipeToStart(
+                      label: 'اسحب للبدء',
+                      onDone: () => _finish(const MainShell()),
+                    ),
                   ),
                 ],
               ),

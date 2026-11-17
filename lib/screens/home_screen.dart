@@ -9,7 +9,6 @@ import '../data/models.dart';
 import '../state/app_state.dart';
 import '../widgets/animations.dart';
 import '../widgets/common.dart';
-import '../widgets/flame_logo.dart';
 import '../widgets/icon3d.dart';
 import '../widgets/table_picker.dart';
 import 'search_screen.dart';
@@ -49,15 +48,27 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     Container(
-                      width: 46,
-                      height: 46,
-                      padding: const EdgeInsets.all(9),
-                      decoration: BoxDecoration(
+                      width: 48,
+                      height: 48,
+                      padding: const EdgeInsets.all(2.5),
+                      decoration: const BoxDecoration(
                         gradient: AppColors.fire,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: glowShadow(),
+                        shape: BoxShape.circle,
                       ),
-                      child: CustomPaint(painter: FlamePainter()),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: AppColors.surface2,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: firstName.isEmpty
+                            ? const Icon3D('yum', size: 30)
+                            : Text(firstName.characters.first,
+                                style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppColors.primary)),
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -65,24 +76,22 @@ class HomeScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            firstName.isEmpty
-                                ? '$greeting 👋'
-                                : '$greeting، $firstName 👋',
+                            firstName.isEmpty ? 'أهلاً بك 👋' : 'أهلاً $firstName 👋',
                             style: const TextStyle(
-                                fontSize: 13, color: AppColors.muted),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.text),
                           ),
-                          const Text(AppConfig.appName,
-                              style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppColors.text,
-                                  height: 1.2)),
+                          Text('$greeting • ${AppConfig.appName}',
+                              style: const TextStyle(
+                                  fontSize: 12, color: AppColors.muted)),
                         ],
                       ),
                     ),
                     CircleIconButton(
                       icon: Icons.notifications_none_rounded,
-                      image: 'bell',
+                      color: AppColors.primary,
+                      background: AppColors.surface2,
                       badge: state.orders
                           .where((o) =>
                               o.status == OrderStatus.preparing ||
@@ -105,16 +114,16 @@ class HomeScreen extends StatelessWidget {
                 child: Text.rich(
                   TextSpan(
                     style: TextStyle(
-                        fontSize: 30,
-                        height: 1.25,
+                        fontSize: 36,
+                        height: 1.2,
                         fontWeight: FontWeight.w900,
                         color: AppColors.text),
                     children: [
-                      TextSpan(text: 'شو نفسك تاكل\n'),
+                      TextSpan(text: 'شو بدك تاكل\n'),
                       TextSpan(
                           text: 'اليوم',
                           style: TextStyle(color: AppColors.primary)),
-                      TextSpan(text: '؟ 🍗'),
+                      TextSpan(text: '؟'),
                     ],
                   ),
                 ),
@@ -125,44 +134,41 @@ class HomeScreen extends StatelessWidget {
             FadeSlideIn(
               index: i++,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Pressable(
-                        scale: 0.98,
-                        onTap: () => Navigator.push(
-                            context,
-                            SmoothRoute<void>(
-                                builder: (_) => const SearchScreen())),
-                        child: Container(
-                          height: 54,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: softShadow(),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon3D('search', size: 24),
-                              SizedBox(width: 10),
-                              Text('ابحث عن وجبة، برجر، حلويات...',
-                                  style: TextStyle(color: AppColors.muted)),
-                            ],
-                          ),
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                child: Pressable(
+                  scale: 0.98,
+                  onTap: () => Navigator.push(
+                      context,
+                      RevealRoute<void>(builder: (_) => const SearchScreen())),
+                  child: Container(
+                    height: 56,
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(28),
+                      border:
+                          Border.all(color: Colors.white.withValues(alpha: 0.06)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.search_rounded,
+                            color: AppColors.muted, size: 24),
+                        const SizedBox(width: 10),
+                        const Expanded(
+                          child: Text('ابحث عن وجبتك المفضّلة...',
+                              style: TextStyle(color: AppColors.muted)),
                         ),
-                      ),
+                        Container(
+                            width: 1, height: 24, color: AppColors.border),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () => onOpenMenu(null),
+                          child: const Icon(Icons.tune_rounded,
+                              color: AppColors.text, size: 22),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 10),
-                    CircleIconButton(
-                      icon: Icons.tune_rounded,
-                      size: 54,
-                      color: Colors.white,
-                      background: AppColors.ink,
-                      onTap: () => onOpenMenu(null),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -272,15 +278,17 @@ class HomeScreen extends StatelessWidget {
             ],
 
             // ===== الأكثر طلباً =====
-            const SectionHeader('الأكثر طلباً',
-                subtitle: 'الأصناف اللي الكل بيحبها', icon: 'fire'),
+            SectionHeader('رائج الآن',
+                subtitle: 'الأصناف اللي الكل بيحبها',
+                icon: 'fire',
+                onSeeAll: () => onOpenMenu(null)),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
                   for (var k = 0; k < state.popular.take(5).length; k++)
                     FadeSlideIn(
-                        index: k, child: FoodTile(item: state.popular[k])),
+                        index: k, child: TrendCard(item: state.popular[k])),
                 ],
               ),
             ),
@@ -386,7 +394,7 @@ class OrderModeSwitch extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(22),
         boxShadow: softShadow(),
       ),
@@ -674,7 +682,7 @@ class _BannerCard extends StatelessWidget {
                             SizedBox(width: 8),
                             CircleAvatar(
                               radius: 11,
-                              backgroundColor: Colors.white,
+                              backgroundColor: AppColors.surface2,
                               child: Icon(Icons.arrow_back,
                                   size: 14, color: AppColors.primary),
                             ),
@@ -708,9 +716,14 @@ class _FlashDeal extends StatelessWidget {
       child: Container(
         height: 176,
         decoration: BoxDecoration(
-          color: AppColors.ink,
+          gradient: const LinearGradient(
+            begin: Alignment.centerRight,
+            end: Alignment.centerLeft,
+            colors: [Color(0xFF2B1A12), AppColors.surface],
+          ),
           borderRadius: BorderRadius.circular(28),
-          boxShadow: glowShadow(AppColors.ink),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+          boxShadow: softShadow(),
         ),
         child: Stack(
           clipBehavior: Clip.none,

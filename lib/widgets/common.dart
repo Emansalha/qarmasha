@@ -78,7 +78,7 @@ class CircleIconButton extends StatelessWidget {
     this.badge = 0,
     this.size = 46,
     this.color = AppColors.text,
-    this.background = Colors.white,
+    this.background = AppColors.surface,
     this.image,
   });
 
@@ -120,7 +120,7 @@ class CircleIconButton extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: AppColors.fire,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+                  border: Border.all(color: AppColors.background, width: 2),
                 ),
                 constraints: const BoxConstraints(minWidth: 22, minHeight: 22),
                 child: Text(
@@ -235,7 +235,7 @@ class QtyStepper extends StatelessWidget {
             height: s,
             decoration: BoxDecoration(
               gradient: filled ? AppColors.fire : null,
-              color: filled ? null : Colors.white,
+              color: filled ? null : AppColors.surface2,
               borderRadius: BorderRadius.circular(s * 0.36),
               border: filled ? null : Border.all(color: AppColors.border),
             ),
@@ -413,7 +413,7 @@ class FoodCard extends StatelessWidget {
               top: plate * 0.42,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: softShadow(),
                 ),
@@ -429,7 +429,7 @@ class FoodCard extends StatelessWidget {
                     height: plate,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 4),
+                      border: Border.all(color: AppColors.surface2, width: 4),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.22),
@@ -566,7 +566,7 @@ class FoodTile extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(24),
           boxShadow: softShadow(),
         ),
@@ -702,43 +702,41 @@ class CategoryBubble extends StatelessWidget {
     final photo = (imageUrl != null && imageUrl!.isNotEmpty)
         ? imageUrl!
         : (label == 'الكل' ? img('family_box') : categoryPhoto(label));
-    final icon = label == 'الكل' ? 'dinein' : categoryIcon(label);
     return Pressable(
       onTap: onTap,
       child: SizedBox(
-        width: 84,
+        width: 78,
         child: Column(
           children: [
             AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
+              duration: const Duration(milliseconds: 300),
               curve: Curves.easeOutBack,
-              width: selected ? 74 : 68,
-              height: selected ? 74 : 68,
-              padding: const EdgeInsets.all(3),
+              width: 66,
+              height: 66,
+              padding: EdgeInsets.all(selected ? 7 : 9),
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
                 gradient: selected ? AppColors.fire : null,
-                color: selected ? null : Colors.white,
+                color: selected ? null : AppColors.surface,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: selected
+                      ? Colors.transparent
+                      : Colors.white.withValues(alpha: 0.06),
+                ),
                 boxShadow: selected ? glowShadow() : softShadow(),
               ),
-              child: ClipOval(
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    NetImage(photo),
-                    Align(
-                      alignment: const Alignment(0.62, 0.62),
-                      child: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon3D(icon, size: 18),
-                      ),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.45),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
+                child: ClipOval(child: NetImage(photo)),
               ),
             ),
             const SizedBox(height: 8),
@@ -788,7 +786,7 @@ class EmptyState extends StatelessWidget {
             height: 150,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 6),
+              border: Border.all(color: AppColors.surface2, width: 6),
               boxShadow: softShadow(),
             ),
             child: image.startsWith('icon:')
@@ -818,6 +816,148 @@ class EmptyState extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// بطاقة «رائج الآن» العريضة: نص على جهة وصورة كبيرة على الجهة الأخرى،
+/// زر مفضلة دائري وزر سهم أبيض فوق الصورة.
+class TrendCard extends StatelessWidget {
+  const TrendCard({super.key, required this.item});
+  final MenuItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = AppScope.of(context);
+    final fav = state.isFavorite(item);
+    return Pressable(
+      scale: 0.97,
+      onTap: () => openItem(context, item),
+      child: Container(
+        height: 176,
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+          boxShadow: softShadow(),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 5,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 14, 16, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Pressable(
+                      scale: 0.8,
+                      onTap: () => state.toggleFavorite(item),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: fav ? AppColors.fire : null,
+                          color: fav ? null : AppColors.surface2,
+                        ),
+                        child: Icon(
+                          fav
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(item.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 17,
+                            height: 1.25,
+                            fontWeight: FontWeight.w900)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface2,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.schedule_rounded,
+                                  size: 13, color: AppColors.muted),
+                              const SizedBox(width: 3),
+                              Text('${item.prepMinutes} د',
+                                  style: const TextStyle(
+                                      fontSize: 11, color: AppColors.muted)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(money(item.finalPrice, state.currency),
+                              maxLines: 1,
+                              style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 6,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    NetImage(item.imageUrl, radius: 24),
+                    Positioned(
+                      top: 10,
+                      left: 10,
+                      child: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.north_west_rounded,
+                            size: 20, color: AppColors.background),
+                      ),
+                    ),
+                    if (item.hasDiscount)
+                      Positioned(
+                        top: 12,
+                        right: 10,
+                        child: Tag('-${item.discountPercent}%'),
+                      ),
+                    Positioned(
+                      bottom: 8,
+                      left: 8,
+                      child: AddButton(
+                          size: 38, onTap: () => quickAdd(context, item)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -223,7 +223,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(22),
                 boxShadow: softShadow(),
               ),
@@ -405,7 +405,7 @@ class _TypeCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : Colors.white,
+          color: selected ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
               color: selected ? AppColors.primary : AppColors.border),
@@ -451,7 +451,7 @@ class _PayOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
               color: selected ? AppColors.primary : AppColors.border,

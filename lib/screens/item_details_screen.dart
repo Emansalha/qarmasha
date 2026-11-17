@@ -141,6 +141,17 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Center(
+                        child: Container(
+                          width: 46,
+                          height: 5,
+                          margin: const EdgeInsets.only(bottom: 18),
+                          decoration: BoxDecoration(
+                            color: AppColors.border,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                      ),
                       FadeSlideIn(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,7 +210,62 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 16),
+                      FadeSlideIn(
+                        index: 2,
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.06)),
+                          ),
+                          child: Row(
+                            children: [
+                              const IconTile('cook',
+                                  size: 46, color: AppColors.surface2),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('مطبخ قرمشة',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w900)),
+                                    Text('يُحضَّر طازجاً لحظة طلبك',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.muted)),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 7),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.verified_rounded,
+                                        size: 16, color: AppColors.primary),
+                                    SizedBox(width: 4),
+                                    Text('طازج 100%',
+                                        style: TextStyle(
+                                            color: AppColors.background,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w900)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       FadeSlideIn(
                         index: 2,
                         child: Text(
@@ -218,12 +284,13 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                         const _Title('اختر الحجم', icon: 'burger'),
                         FadeSlideIn(
                           index: 3,
-                          child: Row(
-                            children: [
-                              for (final s in _sizes)
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 8),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                for (final s in _sizes)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 10),
                                     child: _SizeCard(
                                       option: s,
                                       selected: _size?.id == s.id,
@@ -234,8 +301,8 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                                       },
                                     ),
                                   ),
-                                ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -248,7 +315,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.surface,
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: softShadow(),
                             ),
@@ -299,9 +366,7 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
                       // ===== الإضافات =====
                       if (_extraOptions.isNotEmpty) ...[
                         const _Title('أضف لمستك', icon: 'sparkles'),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
+                        Column(
                           children: [
                             for (final e in _extraOptions)
                               _ExtraChip(
@@ -374,17 +439,18 @@ class _ItemDetailsScreenState extends State<ItemDetailsScreen> {
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.ink,
-            borderRadius: BorderRadius.circular(26),
-            boxShadow: glowShadow(AppColors.ink),
+            color: AppColors.surface2,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            boxShadow: softShadow(),
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: QtyStepper(
                   value: _qty,
@@ -482,22 +548,18 @@ class _Info extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(left: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: softShadow(),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(left: 18),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon3D(icon, size: 18),
           const SizedBox(width: 5),
           Text(text,
-              style:
-                  const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+              style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.muted,
+                  fontWeight: FontWeight.w700)),
         ],
       ),
     );
@@ -523,34 +585,34 @@ class _SizeCard extends StatelessWidget {
       scale: 0.94,
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
         decoration: BoxDecoration(
           gradient: selected ? AppColors.fire : null,
-          color: selected ? null : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: selected ? glowShadow() : softShadow(),
+          color: selected ? null : AppColors.surface,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+              color: selected
+                  ? Colors.transparent
+                  : Colors.white.withValues(alpha: 0.08)),
+          boxShadow: selected ? glowShadow() : null,
         ),
-        child: Column(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedScale(
-              scale: selected ? 1.12 : 1,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutBack,
-              child: Icon3D('burger',
-                  size: option.id == 'regular'
-                      ? 24
-                      : (option.id == 'large' ? 30 : 36)),
-            ),
-            const SizedBox(height: 4),
             Text(option.label,
                 style: TextStyle(
                     fontWeight: FontWeight.w900,
                     color: selected ? Colors.white : AppColors.text)),
-            Text(option.price == 0 ? 'أساسي' : '+${money(option.price, currency)}',
-                style: TextStyle(
-                    fontSize: 11,
-                    color: selected ? Colors.white70 : AppColors.muted)),
+            if (option.price > 0) ...[
+              const SizedBox(width: 6),
+              Text('+${money(option.price, currency)}',
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: selected ? Colors.white70 : AppColors.muted)),
+            ],
           ],
         ),
       ),
@@ -558,6 +620,7 @@ class _SizeCard extends StatelessWidget {
   }
 }
 
+/// صف إضافة (مثل خطوات الوصفة في التصميم المرجعي).
 class _ExtraChip extends StatelessWidget {
   const _ExtraChip({
     required this.option,
@@ -574,46 +637,69 @@ class _ExtraChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Pressable(
-      scale: 0.93,
+      scale: 0.97,
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+        duration: const Duration(milliseconds: 220),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary.withValues(alpha: 0.08) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          color: selected
+              ? AppColors.primary.withValues(alpha: 0.12)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(22),
           border: Border.all(
-              color: selected ? AppColors.primary : AppColors.border,
+              color: selected
+                  ? AppColors.primary
+                  : Colors.white.withValues(alpha: 0.06),
               width: selected ? 1.5 : 1),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            if (option.icon != null) ...[
-              Icon3D(option.icon!, size: 22),
-              const SizedBox(width: 4),
-            ],
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
-              child: Icon(
-                selected
-                    ? Icons.check_circle_rounded
-                    : Icons.add_circle_outline_rounded,
-                key: ValueKey(selected),
-                size: 18,
-                color: selected ? AppColors.primary : AppColors.muted,
+            Container(
+              width: 46,
+              height: 46,
+              padding: const EdgeInsets.all(9),
+              decoration: const BoxDecoration(
+                color: AppColors.surface2,
+                shape: BoxShape.circle,
+              ),
+              child: option.icon != null
+                  ? Icon3D(option.icon!, size: 28)
+                  : const Icon(Icons.add, color: AppColors.primary),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(option.label,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w800, fontSize: 15)),
+                  Text('+${money(option.price, currency)}',
+                      style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w800)),
+                ],
               ),
             ),
-            const SizedBox(width: 6),
-            Text(option.label,
-                style: const TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(width: 6),
-            Text('+${money(option.price, currency)}',
-                style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w800)),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: selected ? AppColors.fire : null,
+                border: selected
+                    ? null
+                    : Border.all(color: AppColors.muted, width: 1.5),
+              ),
+              child: selected
+                  ? const Icon(Icons.check_rounded,
+                      size: 18, color: Colors.white)
+                  : null,
+            ),
           ],
         ),
       ),

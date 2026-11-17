@@ -38,7 +38,7 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: Colors.white,
+                  backgroundColor: AppColors.surface2,
                   child: Text(
                     user == null || user.name.isEmpty
                         ? '👤'
@@ -72,7 +72,7 @@ class ProfileScreen extends StatelessWidget {
                 if (user == null)
                   TextButton(
                     style: TextButton.styleFrom(
-                        backgroundColor: Colors.white,
+                        backgroundColor: AppColors.surface2,
                         foregroundColor: AppColors.primary),
                     onPressed: () => Navigator.push(
                         context,
@@ -171,7 +171,7 @@ class _Stat extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(18),
             boxShadow: softShadow(),
           ),
@@ -210,7 +210,7 @@ class _Tile extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(18),
           boxShadow: softShadow(),
         ),

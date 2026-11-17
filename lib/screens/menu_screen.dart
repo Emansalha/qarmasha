@@ -70,7 +70,7 @@ class _MenuScreenState extends State<MenuScreen> {
                     width: 46,
                     height: 46,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: softShadow(),
                     ),

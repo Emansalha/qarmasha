@@ -82,7 +82,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           for (final s in _suggestions)
                             ActionChip(
                               label: Text(s),
-                              backgroundColor: Colors.white,
+                              backgroundColor: AppColors.surface2,
                               side: const BorderSide(color: AppColors.border),
                               onPressed: () {
                                 _controller.text = s;

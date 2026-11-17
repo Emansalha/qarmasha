@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 
-/// ألوان التطبيق — أحمر دافئ وكريمي يفتح الشهية.
+/// ألوان التطبيق — ثيم داكن فاخر بلمسة برتقالية نارية.
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFFD62828);
-  static const Color primaryDark = Color(0xFF9B1C1C);
-  static const Color accent = Color(0xFFF7B32B);
-  static const Color background = Color(0xFFFFF8F1);
-  static const Color surface = Colors.white;
-  static const Color text = Color(0xFF2B1D1A);
-  static const Color muted = Color(0xFF8A7B75);
-  static const Color border = Color(0xFFF1E4DA);
-  static const Color success = Color(0xFF2E9E5B);
-  static const Color cream = Color(0xFFFFEFE2);
-  static const Color ink = Color(0xFF1C1210);
+  static const Color primary = Color(0xFFFF6B35);
+  static const Color primaryDark = Color(0xFFE04E1A);
+  static const Color accent = Color(0xFFFFB547);
+  static const Color background = Color(0xFF131313);
+  static const Color surface = Color(0xFF1E1E1E);
+  static const Color surface2 = Color(0xFF2A2A2A);
+  static const Color text = Color(0xFFF6F6F6);
+  static const Color muted = Color(0xFF9B9B9B);
+  static const Color border = Color(0xFF2F2F2F);
+  static const Color success = Color(0xFF34C77B);
+  static const Color cream = Color(0xFF2A2A2A);
+  static const Color ink = Color(0xFF262626);
 
   static const LinearGradient fire = LinearGradient(
     begin: Alignment.topRight,
     end: Alignment.bottomLeft,
-    colors: [Color(0xFFEF4136), Color(0xFFB71C1C)],
+    colors: [Color(0xFFFF8A4C), Color(0xFFFF5A1F)],
   );
 }
 
@@ -32,11 +33,16 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       fontFamily: kFont,
+      brightness: Brightness.dark,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
+        brightness: Brightness.dark,
         primary: AppColors.primary,
         surface: AppColors.surface,
+        onSurface: AppColors.text,
       ),
+      canvasColor: AppColors.surface,
+      dividerColor: AppColors.border,
       scaffoldBackgroundColor: AppColors.background,
     );
     return base.copyWith(
@@ -57,7 +63,8 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.surface,
+        hintStyle: const TextStyle(color: AppColors.muted),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
@@ -96,7 +103,7 @@ class AppTheme {
 /// ظل ناعم موحّد للبطاقات.
 List<BoxShadow> softShadow() => [
       BoxShadow(
-        color: const Color(0xFF9B1C1C).withValues(alpha: 0.07),
+        color: Colors.black.withValues(alpha: 0.35),
         blurRadius: 18,
         offset: const Offset(0, 8),
       ),
