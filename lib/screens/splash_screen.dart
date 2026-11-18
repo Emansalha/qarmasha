@@ -96,7 +96,7 @@ class _SplashScreenState extends State<SplashScreen>
           return Container(
             decoration: const BoxDecoration(
               gradient: RadialGradient(
-                center: Alignment(0, -0.2),
+                center: Alignment.center,
                 radius: 1.1,
                 colors: [Color(0xFF3B1E12), AppColors.background, Color(0xFF080808)],
                 stops: [0.0, 0.5, 1.0],
@@ -112,10 +112,9 @@ class _SplashScreenState extends State<SplashScreen>
                         _loop.value + _intro.value, _outer.value.clamp(0.0, 1.0)),
                   ),
                 ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
+                // الشعار في منتصف الشاشة تماماً (نفس مكان شاشة إطلاق أندرويد)
+                Center(
+                    child: SizedBox(
                       width: 220,
                       height: 220,
                       child: Stack(
@@ -152,8 +151,8 @@ class _SplashScreenState extends State<SplashScreen>
                             ),
                           ),
                           SizedBox(
-                            width: 120,
-                            height: 120,
+                            width: 146,
+                            height: 146,
                             child: CustomPaint(
                               painter: FlamePainter(
                                 outerColor: AppColors.primary,
@@ -166,7 +165,14 @@ class _SplashScreenState extends State<SplashScreen>
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                ),
+                // الاسم والشعار النصي أسفل الشعار
+                Center(
+                  child: Transform.translate(
+                    offset: const Offset(0, 150),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                     // اسم المطعم يظهر حرفاً حرفاً
                     Opacity(
                       opacity: _title.value,
@@ -225,6 +231,8 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ),
                   ],
+                ),
+                  ),
                 ),
               ],
             ),

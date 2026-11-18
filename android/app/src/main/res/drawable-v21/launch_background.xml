@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- شاشة البداية الأصلية: خلفية حمراء وشعار اللهب في المنتصف -->
+<!-- شاشة الإطلاق (Android 11 وأقدم): خلفية داكنة وشعار اللهب في المنتصف تماماً -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@color/splash_red" />
-    <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@mipmap/launch_image" />
+    <item android:drawable="@color/splash_bg" />
+    <item android:gravity="center">
+        <bitmap android:gravity="center" android:src="@mipmap/launch_image" />
     </item>
 </layer-list>

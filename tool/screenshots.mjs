@@ -3,7 +3,7 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 
 const base = process.env.BASE_URL || 'http://localhost:8080/';
-const screens = ['welcome', 'home', 'menu', 'item', 'cart', 'checkout', 'success', 'tracking', 'orders', 'offers', 'profile'];
+const screens = ['splash', 'welcome', 'home', 'menu', 'item', 'cart', 'checkout', 'success', 'tracking', 'orders', 'offers', 'profile'];
 fs.mkdirSync('shots', { recursive: true });
 
 const browser = await chromium.launch({
@@ -19,7 +19,7 @@ page.on('console', (m) => { if (m.type() === 'error') console.log('console:', m.
 
 for (const s of screens) {
   await page.goto(`${base}?screen=${s}`, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(s === 'welcome' ? 6000 : 5000);
+  await page.waitForTimeout(s === 'splash' ? 2600 : (s === 'welcome' ? 6000 : 5000));
   await page.screenshot({ path: `shots/${s}.png` });
   console.log('shot', s);
   if (s === 'home') {
