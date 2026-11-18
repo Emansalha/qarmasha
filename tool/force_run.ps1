@@ -1,6 +1,6 @@
 # Qarmasha - force run (Windows PowerShell)
 # Usage:  double-click force_run.bat   OR   powershell -ExecutionPolicy Bypass -File tool\force_run.ps1 [-Device <id>]
-param([string]$Device = "")
+param([string]$Device = "", [switch]$Emulator)
 $ErrorActionPreference = "Continue"
 $root = Split-Path $PSScriptRoot -Parent
 Set-Location $root
@@ -43,15 +43,51 @@ flutter pub get
 Write-Host "[5/6] Looking for a device..." -ForegroundColor Cyan
 $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
 if (Test-Path $adb) { & $adb start-server | Out-Null }
-if (-not $Device) {
+function Get-AndroidDevices {
   $json = flutter devices --machine 2>$null | Out-String
-  try {
-    $list = $json | ConvertFrom-Json
-    $android = @($list | Where-Object { $_.targetPlatform -like "android*" })
-    $phone = $android | Where-Object { -not $_.emulator } | Select-Object -First 1
-    if (-not $phone) { $phone = $android | Select-Object -First 1 }
-    if ($phone) { $Device = $phone.id; Write-Host "Device: $($phone.name) ($Device)" -ForegroundColor Green }
-  } catch {}
+  try { return @(($json | ConvertFrom-Json) | Where-Object { $_.targetPlatform -like "android*" }) } catch { return @() }
+}
+
+if (-not $Device -and $Emulator) {
+  # Emulator mode: use a running emulator, or launch the first available one
+  $emu = Get-AndroidDevices | Where-Object { $_.emulator } | Select-Object -First 1
+  if (-not $emu) {
+    $ids = flutter emulators 2>$null | ForEach-Object {
+      if ($_ -match '^\s*([^\s]+)\s+\u2022') { $Matches[1] }
+    } | Where-Object { $_ -and $_ -ne "Id" }
+    $first = $ids | Select-Object -First 1
+    if (-not $first) {
+      Write-Host "No emulator found. Create one in Android Studio: Tools > Device Manager > Create device." -ForegroundColor Red
+      exit 1
+    }
+    Write-Host "Launching emulator: $first (wait up to 4 minutes)..." -ForegroundColor Yellow
+    flutter emulators --launch $first | Out-Null
+    for ($i = 0; $i -lt 48 -and -not $emu; $i++) {
+      Start-Sleep -Seconds 5
+      $emu = Get-AndroidDevices | Where-Object { $_.emulator } | Select-Object -First 1
+      Write-Host "." -NoNewline
+    }
+    Write-Host ""
+  }
+  if ($emu) {
+    $Device = $emu.id
+    Write-Host "Emulator: $($emu.name) ($Device)" -ForegroundColor Green
+    # wait until Android finished booting
+    if (Test-Path $adb) {
+      for ($i = 0; $i -lt 60; $i++) {
+        $boot = (& $adb -s $Device shell getprop sys.boot_completed 2>$null | Out-String).Trim()
+        if ($boot -eq "1") { break }
+        Start-Sleep -Seconds 3
+      }
+    }
+  }
+}
+
+if (-not $Device) {
+  $android = Get-AndroidDevices
+  $phone = $android | Where-Object { -not $_.emulator } | Select-Object -First 1
+  if (-not $phone) { $phone = $android | Select-Object -First 1 }
+  if ($phone) { $Device = $phone.id; Write-Host "Device: $($phone.name) ($Device)" -ForegroundColor Green }
 }
 if (-not $Device) {
   Write-Host "No Android device found. Connect the phone with USB, enable USB debugging, press 'Allow' on the phone, then run again." -ForegroundColor Red
