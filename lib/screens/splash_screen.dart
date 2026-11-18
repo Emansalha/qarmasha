@@ -365,18 +365,27 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      const AppLogo(light: true, size: 20),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: () => _finish(const LoginScreen()),
-                        child: const Text('تسجيل الدخول',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800)),
-                      ),
-                    ],
+                  // الشعار في منتصف أعلى الشاشة
+                  SizedBox(
+                    width: double.infinity,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        const FadeSlideIn(
+                          child: AppLogo(light: true, size: 30),
+                        ),
+                        Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: TextButton(
+                            onPressed: () => _finish(const LoginScreen()),
+                            child: const Text('دخول',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800)),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const Spacer(),
                   SizedBox(
