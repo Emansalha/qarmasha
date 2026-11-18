@@ -14,7 +14,10 @@ import 'main_shell.dart';
 /// شاشة البداية: شعار لهب متحرك (ينمو ويتراقص مع جمرات متصاعدة)
 /// ثم يظهر اسم المطعم حرفاً حرفاً قبل الانتقال للتطبيق.
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({super.key, this.autoNavigate = true});
+
+  /// false = تبقى الشاشة ظاهرة (للمعاينة والتقاط الصور فقط).
+  final bool autoNavigate;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -54,6 +57,7 @@ class _SplashScreenState extends State<SplashScreen>
     final state = AppScope.read(context);
     final init = state.init();
     await _intro.forward();
+    if (!widget.autoNavigate) return;
     // ننتظر التحميل قليلاً إن لم ينتهِ (بحد أقصى ثانية إضافية)
     await Future.any([
       init,

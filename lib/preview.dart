@@ -60,7 +60,7 @@ class _PreviewLauncherState extends State<PreviewLauncher> {
     Widget screen;
     switch (widget.screen) {
       case 'splash':
-        screen = const SplashScreen();
+        screen = const SplashScreen(autoNavigate: false);
         break;
       case 'welcome':
         screen = const WelcomeScreen();
