@@ -20,10 +20,16 @@ Start-Sleep -Seconds 2
 # 3) Remove stale lock files
 Write-Host "[2/6] Removing stale lock files..." -ForegroundColor Cyan
 Remove-Item -Recurse -Force "android\.gradle\noVersion" -ErrorAction SilentlyContinue
+# only the places Gradle actually locks (fast, no full scan of caches)
 foreach ($h in @($env:GRADLE_USER_HOME, "$env:USERPROFILE\.gradle")) {
   if ($h -and (Test-Path $h)) {
-    Get-ChildItem $h -Recurse -Include *.lck, *.lock -ErrorAction SilentlyContinue |
-      Remove-Item -Force -ErrorAction SilentlyContinue
+    foreach ($sub in @("wrapper\dists", "caches", "daemon")) {
+      $p = Join-Path $h $sub
+      if (Test-Path $p) {
+        Get-ChildItem $p -Recurse -Depth 3 -Include *.lck, *.lock -ErrorAction SilentlyContinue |
+          Remove-Item -Force -ErrorAction SilentlyContinue
+      }
+    }
   }
 }
 
