@@ -53,17 +53,34 @@ class _SplashScreenState extends State<SplashScreen>
     _start();
   }
 
+  bool _navigated = false;
+
   Future<void> _start() async {
     final state = AppScope.read(context);
-    final init = state.init();
-    await _intro.forward();
+    // التحميل لا يمكن أن يوقف التطبيق: أي خطأ يُتجاهل ونكمل
+    final init = state.init().catchError((Object e) {
+      debugPrint('Qarmasha: init error: $e');
+    });
+    // صمّام أمان: ننتقل بعد 6 ثوانٍ مهما حصل
+    Future<void>.delayed(const Duration(seconds: 6), _go);
+    try {
+      await _intro.forward().orCancel;
+    } catch (_) {}
     if (!widget.autoNavigate) return;
     // ننتظر التحميل قليلاً إن لم ينتهِ (بحد أقصى ثانية إضافية)
-    await Future.any([
-      init,
-      Future<void>.delayed(const Duration(milliseconds: 1000)),
-    ]);
-    if (!mounted) return;
+    try {
+      await Future.any([
+        init,
+        Future<void>.delayed(const Duration(milliseconds: 1000)),
+      ]);
+    } catch (_) {}
+    _go();
+  }
+
+  void _go() {
+    if (_navigated || !widget.autoNavigate || !mounted) return;
+    _navigated = true;
+    final state = AppScope.read(context);
     Navigator.pushReplacement(
       context,
       PageRouteBuilder<void>(

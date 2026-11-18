@@ -62,8 +62,35 @@ class AppState extends ChangeNotifier {
   static const _kAddress = 'saved_address';
   static const _kOnboarding = 'onboarding_seen';
 
+  /// يرجّع SharedPreferences أو null إذا فشلت (حتى لا يتوقف التطبيق أبداً).
+  Future<SharedPreferences?> _prefs() async {
+    try {
+      return await SharedPreferences.getInstance()
+          .timeout(const Duration(seconds: 4));
+    } catch (e) {
+      debugPrint('Qarmasha: SharedPreferences error: $e');
+      return null;
+    }
+  }
+
   Future<void> init() async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      await _loadSaved();
+    } catch (e, st) {
+      // بيانات محفوظة تالفة من نسخة قديمة: نتجاهلها ونكمل
+      debugPrint('Qarmasha: failed to restore saved data: $e\n$st');
+    }
+    notifyListeners();
+    try {
+      await loadMenu();
+    } catch (e) {
+      debugPrint('Qarmasha: loadMenu error: $e');
+    }
+  }
+
+  Future<void> _loadSaved() async {
+    final prefs = await _prefs();
+    if (prefs == null) return;
     final token = prefs.getString(_kToken);
     final userJson = prefs.getString(_kUser);
     if (token != null && userJson != null) {
@@ -86,8 +113,6 @@ class AppState extends ChangeNotifier {
     tableNumber = prefs.getInt(_kTable);
     savedAddress = prefs.getString(_kAddress) ?? '';
     onboardingSeen = prefs.getBool(_kOnboarding) ?? false;
-    notifyListeners();
-    await loadMenu();
   }
 
   /// يحمّل المنيو من دوري؛ وإن لم يتوفر يبقى المنيو الاحتياطي.
@@ -151,14 +176,16 @@ class AppState extends ChangeNotifier {
   Future<void> setOrderMode(OrderType mode) async {
     orderMode = mode;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefs();
+    if (prefs == null) return;
     await prefs.setString(_kMode, mode.apiValue);
   }
 
   Future<void> setTable(int? table) async {
     tableNumber = table;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefs();
+    if (prefs == null) return;
     if (table == null) {
       await prefs.remove(_kTable);
     } else {
@@ -168,13 +195,15 @@ class AppState extends ChangeNotifier {
 
   Future<void> saveAddress(String address) async {
     savedAddress = address;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefs();
+    if (prefs == null) return;
     await prefs.setString(_kAddress, address);
   }
 
   Future<void> markOnboardingSeen() async {
     onboardingSeen = true;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefs();
+    if (prefs == null) return;
     await prefs.setBool(_kOnboarding, true);
   }
 
@@ -187,7 +216,8 @@ class AppState extends ChangeNotifier {
   Future<void> toggleFavorite(MenuItem item) async {
     if (!favorites.remove(item.id)) favorites.add(item.id);
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefs();
+    if (prefs == null) return;
     await prefs.setStringList(
         _kFav, favorites.map((e) => e.toString()).toList());
   }
@@ -267,7 +297,9 @@ class AppState extends ChangeNotifier {
 
   Future<void> _saveSession(String token, AppUser u) async {
     user = u;
-    final prefs = await SharedPreferences.getInstance();
+    notifyListeners();
+    final prefs = await _prefs();
+    if (prefs == null) return;
     await prefs.setString(_kToken, token);
     await prefs.setString(_kUser, jsonEncode(u.toJson()));
     notifyListeners();
@@ -298,7 +330,9 @@ class AppState extends ChangeNotifier {
   Future<void> logout() async {
     await api.logout();
     user = null;
-    final prefs = await SharedPreferences.getInstance();
+    notifyListeners();
+    final prefs = await _prefs();
+    if (prefs == null) return;
     await prefs.remove(_kToken);
     await prefs.remove(_kUser);
     notifyListeners();
@@ -396,7 +430,8 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> _saveOrders() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _prefs();
+    if (prefs == null) return;
     await prefs.setString(
         _kOrders, jsonEncode(orders.map((o) => o.toJson()).toList()));
   }
